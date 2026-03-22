@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Phone,
@@ -89,18 +90,18 @@ export default function AboutPage() {
       <div
         className="py-20 px-4"
         style={{
-          background: "linear-gradient(135deg, #0f2137 0%, #1e3a5f 60%, #2a4f7a 100%)",
+          background: "linear-gradient(135deg, #0F2A0F 0%, #1C3A1C 60%, #254E25 100%)",
         }}
       >
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-block bg-[#c8961e]/20 border border-[#c8961e]/40 text-[#f0b429] text-sm font-medium px-4 py-1.5 rounded-full mb-5">
+            <div className="inline-block bg-[#C4A040]/20 border border-[#C4A040]/40 text-[#D4B050] text-sm font-medium px-4 py-1.5 rounded-full mb-5">
               About Your Agent
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
               Phil Malick
             </h1>
-            <p className="text-[#f0b429] font-semibold text-lg mb-6">
+            <p className="text-[#D4B050] font-semibold text-lg mb-6">
               WV Licensed Real Estate Agent · MalickLand
             </p>
             <p className="text-slate-300 text-base leading-relaxed mb-8">
@@ -112,7 +113,7 @@ export default function AboutPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/contact"
-                className="bg-[#c8961e] hover:bg-[#f0b429] text-white px-7 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
+                className="bg-[#C4A040] hover:bg-[#D4B050] text-white px-7 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
               >
                 Schedule a Call <ArrowRight className="w-4 h-4" />
               </Link>
@@ -126,9 +127,22 @@ export default function AboutPage() {
             </div>
           </div>
 
+          {/* Phil headshot */}
+          <div className="flex flex-col items-center gap-6">
+            <div className="w-56 h-56 rounded-full overflow-hidden border-4 border-[#C4A040] shadow-2xl">
+              <Image
+                src="/phil-headshot.jpg"
+                alt="Phil Malick — WV Real Estate Agent"
+                width={224}
+                height={224}
+                className="object-cover w-full h-full"
+                priority
+              />
+            </div>
+
           {/* Contact card */}
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
-            <h3 className="text-[#f0b429] font-bold text-lg mb-6">
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 w-full">
+            <h3 className="text-[#D4B050] font-bold text-lg mb-6">
               Get In Touch
             </h3>
             <div className="space-y-4">
@@ -136,8 +150,8 @@ export default function AboutPage() {
                 href="tel:15402461421"
                 className="flex items-center gap-3 text-slate-200 hover:text-white transition-colors"
               >
-                <div className="bg-[#c8961e]/20 p-2.5 rounded-lg">
-                  <Phone className="w-5 h-5 text-[#c8961e]" />
+                <div className="bg-[#C4A040]/20 p-2.5 rounded-lg">
+                  <Phone className="w-5 h-5 text-[#C4A040]" />
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider">
@@ -150,8 +164,8 @@ export default function AboutPage() {
                 href="mailto:phil@malickland.net"
                 className="flex items-center gap-3 text-slate-200 hover:text-white transition-colors"
               >
-                <div className="bg-[#c8961e]/20 p-2.5 rounded-lg">
-                  <Mail className="w-5 h-5 text-[#c8961e]" />
+                <div className="bg-[#C4A040]/20 p-2.5 rounded-lg">
+                  <Mail className="w-5 h-5 text-[#C4A040]" />
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider">
@@ -161,8 +175,8 @@ export default function AboutPage() {
                 </div>
               </a>
               <div className="flex items-center gap-3 text-slate-200">
-                <div className="bg-[#c8961e]/20 p-2.5 rounded-lg">
-                  <MapPin className="w-5 h-5 text-[#c8961e]" />
+                <div className="bg-[#C4A040]/20 p-2.5 rounded-lg">
+                  <MapPin className="w-5 h-5 text-[#C4A040]" />
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider">
@@ -176,6 +190,7 @@ export default function AboutPage() {
                 </div>
               </div>
             </div>
+            </div>
           </div>
         </div>
       </div>
@@ -185,7 +200,7 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <div>
-              <h2 className="text-3xl font-bold text-[#1e3a5f] mb-6">
+              <h2 className="text-3xl font-bold text-[#1C3A1C] mb-6">
                 Background & Experience
               </h2>
               <div className="space-y-4 text-slate-600 leading-relaxed">
@@ -223,15 +238,15 @@ export default function AboutPage() {
             <div className="space-y-6">
               {/* Values */}
               <div className="bg-slate-50 rounded-2xl p-7 border border-slate-200">
-                <h3 className="font-bold text-[#1e3a5f] text-lg mb-5">
+                <h3 className="font-bold text-[#1C3A1C] text-lg mb-5">
                   How Phil Works
                 </h3>
                 <div className="space-y-4">
                   {values.map((v) => (
                     <div key={v.title} className="flex gap-3">
-                      <CheckCircle className="w-5 h-5 text-[#c8961e] mt-0.5 shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-[#C4A040] mt-0.5 shrink-0" />
                       <div>
-                        <div className="font-semibold text-[#1e3a5f] text-sm">
+                        <div className="font-semibold text-[#1C3A1C] text-sm">
                           {v.title}
                         </div>
                         <div className="text-slate-500 text-sm">{v.desc}</div>
@@ -242,12 +257,12 @@ export default function AboutPage() {
               </div>
 
               {/* Ratings */}
-              <div className="bg-[#1e3a5f] rounded-2xl p-7 text-white">
+              <div className="bg-[#1C3A1C] rounded-2xl p-7 text-white">
                 <div className="flex gap-1 mb-3">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className="w-5 h-5 text-[#f0b429] fill-[#f0b429]"
+                      className="w-5 h-5 text-[#D4B050] fill-[#D4B050]"
                     />
                   ))}
                 </div>
@@ -270,7 +285,7 @@ export default function AboutPage() {
       <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#1e3a5f] mb-3">
+            <h2 className="text-3xl font-bold text-[#1C3A1C] mb-3">
               Areas of Expertise
             </h2>
             <p className="text-slate-500 max-w-lg mx-auto">
@@ -284,12 +299,12 @@ export default function AboutPage() {
               return (
                 <div
                   key={e.title}
-                  className="bg-white rounded-xl p-6 border border-slate-200 hover:border-[#c8961e]/40 hover:shadow-md transition-all"
+                  className="bg-white rounded-xl p-6 border border-slate-200 hover:border-[#C4A040]/40 hover:shadow-md transition-all"
                 >
-                  <div className="bg-[#1e3a5f]/10 w-11 h-11 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-[#1e3a5f]" />
+                  <div className="bg-[#1C3A1C]/10 w-11 h-11 rounded-lg flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-[#1C3A1C]" />
                   </div>
-                  <h3 className="font-bold text-[#1e3a5f] mb-2">{e.title}</h3>
+                  <h3 className="font-bold text-[#1C3A1C] mb-2">{e.title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed">
                     {e.desc}
                   </p>
@@ -304,7 +319,7 @@ export default function AboutPage() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#1e3a5f] mb-3">
+            <h2 className="text-3xl font-bold text-[#1C3A1C] mb-3">
               Service Area
             </h2>
             <p className="text-slate-500 max-w-lg mx-auto">
@@ -318,9 +333,9 @@ export default function AboutPage() {
                 key={c.name}
                 className="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl p-5"
               >
-                <MapPin className="w-5 h-5 text-[#c8961e] shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-[#C4A040] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-semibold text-[#1e3a5f] text-sm">
+                  <div className="font-semibold text-[#1C3A1C] text-sm">
                     {c.name}
                   </div>
                   <div className="text-slate-400 text-xs mt-0.5">{c.city}</div>
@@ -332,7 +347,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-[#1e3a5f]">
+      <section className="py-20 bg-[#1C3A1C]">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Work With Phil?
@@ -344,7 +359,7 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contact"
-              className="bg-[#c8961e] hover:bg-[#f0b429] text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
+              className="bg-[#C4A040] hover:bg-[#D4B050] text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
             >
               Contact Phil Today
             </Link>

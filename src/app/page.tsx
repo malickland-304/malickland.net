@@ -96,7 +96,7 @@ export default function HomePage() {
         className="relative min-h-[85vh] flex items-center overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, #0f2137 0%, #1e3a5f 50%, #2a4f7a 100%)",
+            "linear-gradient(135deg, #0F2A0F 0%, #1C3A1C 50%, #254E25 100%)",
         }}
       >
         {/* Decorative mountain silhouette */}
@@ -112,14 +112,14 @@ export default function HomePage() {
 
         <div className="relative max-w-6xl mx-auto px-4 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#c8961e]/20 border border-[#c8961e]/40 rounded-full px-4 py-1.5 text-[#f0b429] text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-[#C4A040]/20 border border-[#C4A040]/40 rounded-full px-4 py-1.5 text-[#D4B050] text-sm font-medium mb-6">
               <MapPin className="w-4 h-4" />
               Eastern Panhandle, West Virginia
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
               Your WV Real Estate
-              <span className="text-[#c8961e]"> Expert</span>
+              <span className="text-[#C4A040]"> Expert</span>
             </h1>
 
             <p className="text-slate-300 text-lg leading-relaxed mb-8 max-w-lg">
@@ -131,7 +131,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/listings"
-                className="bg-[#c8961e] hover:bg-[#f0b429] text-white px-8 py-3.5 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
+                className="bg-[#C4A040] hover:bg-[#D4B050] text-white px-8 py-3.5 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
               >
                 View Listings <ArrowRight className="w-4 h-4" />
               </Link>
@@ -148,14 +148,14 @@ export default function HomePage() {
                 href="tel:15402461421"
                 className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
               >
-                <Phone className="w-4 h-4 text-[#c8961e]" />
+                <Phone className="w-4 h-4 text-[#C4A040]" />
                 <span className="text-sm">(540) 246-1421</span>
               </a>
               <a
                 href="mailto:phil@malickland.net"
                 className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
               >
-                <Mail className="w-4 h-4 text-[#c8961e]" />
+                <Mail className="w-4 h-4 text-[#C4A040]" />
                 <span className="text-sm">phil@malickland.net</span>
               </a>
             </div>
@@ -170,19 +170,19 @@ export default function HomePage() {
                     key={s.label}
                     className="text-center bg-white/5 rounded-xl p-5"
                   >
-                    <div className="text-3xl font-bold text-[#f0b429]">
+                    <div className="text-3xl font-bold text-[#D4B050]">
                       {s.value}
                     </div>
                     <div className="text-slate-300 text-sm mt-1">{s.label}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 bg-[#c8961e]/20 rounded-xl p-4 text-center">
+              <div className="mt-6 bg-[#C4A040]/20 rounded-xl p-4 text-center">
                 <div className="flex justify-center mb-1">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className="w-4 h-4 text-[#f0b429] fill-[#f0b429]"
+                      className="w-4 h-4 text-[#D4B050] fill-[#D4B050]"
                     />
                   ))}
                 </div>
@@ -197,10 +197,10 @@ export default function HomePage() {
       </section>
 
       {/* ── AREAS SERVED ─────────────────────────────────────────────── */}
-      <section className="bg-[#1e3a5f] py-4">
+      <section className="bg-[#1C3A1C] py-4">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            <span className="text-[#c8961e] text-sm font-semibold uppercase tracking-wider">
+            <span className="text-[#C4A040] text-sm font-semibold uppercase tracking-wider">
               Serving:
             </span>
             {counties.map((c, i) => (
@@ -222,7 +222,7 @@ export default function HomePage() {
       <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1C3A1C] mb-4">
               How MalickLand Can Help
             </h2>
             <p className="text-slate-500 max-w-xl mx-auto">
@@ -237,12 +237,12 @@ export default function HomePage() {
               return (
                 <div
                   key={s.title}
-                  className="bg-white rounded-xl p-6 border border-slate-200 hover:border-[#c8961e]/50 hover:shadow-md transition-all group"
+                  className="bg-white rounded-xl p-6 border border-slate-200 hover:border-[#C4A040]/50 hover:shadow-md transition-all group"
                 >
-                  <div className="bg-[#1e3a5f]/10 group-hover:bg-[#1e3a5f] w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors">
-                    <Icon className="w-6 h-6 text-[#1e3a5f] group-hover:text-white transition-colors" />
+                  <div className="bg-[#1C3A1C]/10 group-hover:bg-[#1C3A1C] w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors">
+                    <Icon className="w-6 h-6 text-[#1C3A1C] group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="font-bold text-[#1e3a5f] mb-2">{s.title}</h3>
+                  <h3 className="font-bold text-[#1C3A1C] mb-2">{s.title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed">
                     {s.desc}
                   </p>
@@ -258,10 +258,10 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-block bg-[#c8961e]/10 text-[#c8961e] font-semibold text-sm px-3 py-1 rounded mb-4 uppercase tracking-wider">
+              <div className="inline-block bg-[#C4A040]/10 text-[#C4A040] font-semibold text-sm px-3 py-1 rounded mb-4 uppercase tracking-wider">
                 About Your Agent
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#1e3a5f] mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1C3A1C] mb-6">
                 Phil Malick
                 <br />
                 <span className="text-slate-500 text-2xl font-normal">
@@ -284,20 +284,20 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/about"
-                  className="bg-[#1e3a5f] hover:bg-[#152d4a] text-white px-6 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
+                  className="bg-[#1C3A1C] hover:bg-[#142814] text-white px-6 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
                 >
                   Learn More <ChevronRight className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/contact"
-                  className="border-2 border-[#1e3a5f] text-[#1e3a5f] hover:bg-[#1e3a5f] hover:text-white px-6 py-3 rounded-lg font-semibold text-center transition-colors"
+                  className="border-2 border-[#1C3A1C] text-[#1C3A1C] hover:bg-[#1C3A1C] hover:text-white px-6 py-3 rounded-lg font-semibold text-center transition-colors"
                 >
                   Schedule a Call
                 </Link>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-[#1e3a5f] to-[#2a4f7a] rounded-2xl p-8 text-white">
-              <h3 className="font-bold text-xl mb-6 text-[#f0b429]">
+            <div className="bg-gradient-to-br from-[#1C3A1C] to-[#254E25] rounded-2xl p-8 text-white">
+              <h3 className="font-bold text-xl mb-6 text-[#D4B050]">
                 Why Choose MalickLand?
               </h3>
               <ul className="space-y-4">
@@ -320,7 +320,7 @@ export default function HomePage() {
                   },
                 ].map((item) => (
                   <li key={item.title} className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#c8961e] mt-2 shrink-0" />
+                    <div className="w-2 h-2 rounded-full bg-[#C4A040] mt-2 shrink-0" />
                     <div>
                       <div className="font-semibold text-sm">{item.title}</div>
                       <div className="text-slate-300 text-sm">{item.desc}</div>
@@ -336,7 +336,7 @@ export default function HomePage() {
       {/* ── TESTIMONIALS ─────────────────────────────────────────────── */}
       <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-[#1e3a5f] text-center mb-12">
+          <h2 className="text-3xl font-bold text-[#1C3A1C] text-center mb-12">
             What Clients Say
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -349,7 +349,7 @@ export default function HomePage() {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className="w-4 h-4 text-[#f0b429] fill-[#f0b429]"
+                      className="w-4 h-4 text-[#D4B050] fill-[#D4B050]"
                     />
                   ))}
                 </div>
@@ -357,7 +357,7 @@ export default function HomePage() {
                   &ldquo;{t.quote}&rdquo;
                 </p>
                 <div>
-                  <div className="font-semibold text-[#1e3a5f] text-sm">
+                  <div className="font-semibold text-[#1C3A1C] text-sm">
                     {t.name}
                   </div>
                   <div className="text-slate-400 text-xs">{t.location}</div>
@@ -369,7 +369,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-[#1e3a5f]">
+      <section className="py-20 bg-[#1C3A1C]">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Buy or Sell in WV?
@@ -382,7 +382,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contact"
-              className="bg-[#c8961e] hover:bg-[#f0b429] text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
+              className="bg-[#C4A040] hover:bg-[#D4B050] text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
             >
               Contact Phil Today
             </Link>
