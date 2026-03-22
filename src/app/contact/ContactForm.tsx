@@ -30,12 +30,6 @@ const inquiryTypes = [
   "Schedule a Showing",
 ];
 
-// ── Replace YOUR_FORM_ID below after signing up at formspree.io ──
-// 1. Go to https://formspree.io, create a free account
-// 2. Click "New Form", name it "MalickLand Contact"
-// 3. Copy the form ID (looks like "xpwzqdkr") and replace YOUR_FORM_ID below
-const FORMSPREE_URL = "https://formspree.io/f/YOUR_FORM_ID";
-
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
 export default function ContactForm() {
@@ -50,11 +44,24 @@ export default function ContactForm() {
     const form = e.currentTarget;
     const data = new FormData(form);
 
+    const payload = {
+      firstName: data.get("firstName"),
+      lastName: data.get("lastName"),
+      email: data.get("email"),
+      phone: data.get("phone"),
+      inquiryType: data.get("inquiryType"),
+      propertyType: data.get("propertyType"),
+      county: data.get("county"),
+      budget: data.get("budget"),
+      message: data.get("message"),
+      preferredContact: data.get("preferredContact"),
+    };
+
     try {
-      const res = await fetch(FORMSPREE_URL, {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        body: data,
-        headers: { Accept: "application/json" },
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
       });
 
       if (res.ok) {
@@ -63,7 +70,7 @@ export default function ContactForm() {
       } else {
         const json = await res.json().catch(() => ({}));
         setErrorMsg(
-          json?.errors?.[0]?.message ||
+          json?.error ||
             "Something went wrong. Please try calling or emailing directly."
         );
         setStatus("error");
