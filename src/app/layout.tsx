@@ -45,6 +45,11 @@ export const metadata: Metadata = {
     description:
       "MalickLand — WV Real Estate Agency. Eastern Panhandle specialists. Buy, sell, or invest with Phil Malick.",
   },
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   robots: {
     index: true,
     follow: true,

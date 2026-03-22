@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Phone,
@@ -129,15 +128,17 @@ export default function AboutPage() {
 
           {/* Phil headshot */}
           <div className="flex flex-col items-center gap-6">
-            <div className="w-56 h-56 rounded-full overflow-hidden border-4 border-[#C4A040] shadow-2xl">
-              <Image
-                src="/phil-headshot.jpg"
-                alt="Phil Malick — WV Real Estate Agent"
-                width={224}
-                height={224}
-                className="object-cover w-full h-full"
-                priority
-              />
+            <div className="w-56 h-56 rounded-full overflow-hidden border-4 border-[#C4A040] shadow-2xl bg-[#1C3A1C] flex items-center justify-center">
+              {/* Replace this SVG with: <Image src="/phil-headshot.jpg" alt="Phil Malick" width={224} height={224} className="object-cover w-full h-full" priority /> once you add the photo to public/ */}
+              <svg viewBox="0 0 100 100" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" fill="#1C3A1C"/>
+                <path d="M50,16 L50,4 C28,4 2,20 2,50 C2,80 28,96 50,96 L50,84 C32,80 14,67 14,50 C14,33 32,20 50,16 Z" fill="#254E25"/>
+                <path d="M50,16 L50,4 C72,4 98,20 98,50 C98,80 72,96 50,96 L50,84 C68,80 86,67 86,50 C86,33 68,20 50,16 Z" fill="#254E25"/>
+                <circle cx="50" cy="50" r="34" fill="#C4A040" opacity="0.25"/>
+                <path d="M17,68 L28,32 L36,46 L43,24 L50,14 L57,24 L64,46 L72,32 L83,68 Z" fill="#C4A040" opacity="0.6"/>
+                <path d="M38,68 C32,72 31,80 36,85 C40,89 60,89 64,85 C69,80 68,72 62,68 C57,64 43,64 38,68 Z" fill="#C4A040" opacity="0.6"/>
+                <text x="50" y="95" textAnchor="middle" fill="#C4A040" fontSize="7" fontFamily="sans-serif" opacity="0.8">Add photo to public/</text>
+              </svg>
             </div>
 
           {/* Contact card */}

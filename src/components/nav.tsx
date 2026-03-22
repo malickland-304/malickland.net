@@ -11,46 +11,37 @@ const links = [
   { href: "/contact", label: "Contact" },
 ];
 
-// MalickLand mountain+river SVG icon — matches the actual brand mark
+// MalickLand brand mark — mountain peaks + winding river + sweeping outer arms
 function MalickLandIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 100 100"
-      className={className}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Gold circle background */}
-      <circle cx="50" cy="50" r="38" fill="#C4A040" />
-      {/* Outer dark ring */}
-      <circle cx="50" cy="50" r="47" stroke="#1C3A1C" strokeWidth="6" fill="none" />
-      {/* Mountain peaks */}
+    <svg viewBox="0 0 100 100" className={className} xmlns="http://www.w3.org/2000/svg">
+      {/* Left outer sweeping arm — tapered crescent wrapping left side */}
       <path
-        d="M15 65 L32 32 L44 50 L50 38 L62 22 L75 45 L85 65 Z"
+        d="M50,16 L50,4 C28,4 2,20 2,50 C2,80 28,96 50,96 L50,84 C32,80 14,67 14,50 C14,33 32,20 50,16 Z"
         fill="#1C3A1C"
       />
-      {/* River/road path */}
+      {/* Right outer sweeping arm — mirror */}
       <path
-        d="M50 65 Q52 72 50 80 Q48 88 50 95"
-        stroke="#1C3A1C"
-        strokeWidth="5"
-        strokeLinecap="round"
-        fill="none"
+        d="M50,16 L50,4 C72,4 98,20 98,50 C98,80 72,96 50,96 L50,84 C68,80 86,67 86,50 C86,33 68,20 50,16 Z"
+        fill="#1C3A1C"
       />
-      {/* Outer swoosh arcs */}
+      {/* Gold inner circle */}
+      <circle cx="50" cy="50" r="34" fill="#C4A040" />
+      {/* Mountain mass — three angular peaks */}
       <path
-        d="M8 30 Q2 50 10 72"
-        stroke="#1C3A1C"
-        strokeWidth="5"
-        strokeLinecap="round"
-        fill="none"
+        d="M17,68 L28,32 L36,46 L43,24 L50,14 L57,24 L64,46 L72,32 L83,68 Z"
+        fill="#1C3A1C"
       />
+      {/* White snow/ridge cuts — left peak */}
+      <path d="M28,32 L32,42 L36,36" fill="white" />
+      {/* White cuts — center peak (double summit) */}
+      <path d="M44,26 L47,34 L50,28 L53,34 L56,26 L52,32 L50,18 L48,32 Z" fill="white" />
+      {/* White cuts — right peak */}
+      <path d="M64,46 L68,36 L72,32" fill="white" />
+      {/* River valley — wide winding pool at base of mountains */}
       <path
-        d="M92 30 Q98 50 90 72"
-        stroke="#1C3A1C"
-        strokeWidth="5"
-        strokeLinecap="round"
-        fill="none"
+        d="M38,68 C32,72 31,80 36,85 C40,89 60,89 64,85 C69,80 68,72 62,68 C57,64 43,64 38,68 Z"
+        fill="#1C3A1C"
       />
     </svg>
   );
