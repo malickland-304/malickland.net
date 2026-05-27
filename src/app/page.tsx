@@ -187,7 +187,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-white text-sm font-medium">
-                  "Phil is the best realtor in Hampshire County."
+                  &quot;Phil is the best realtor in Hampshire County.&quot;
                 </p>
                 <p className="text-slate-400 text-xs mt-1">— Verified Client</p>
               </div>
@@ -276,7 +276,7 @@ export default function HomePage() {
                 Panhandle market.
               </p>
               <p className="text-slate-600 leading-relaxed mb-8">
-                Whether you're searching for a historic home in downtown Romney,
+                Whether you&apos;re searching for a historic home in downtown Romney,
                 farmland in Hardy County, or a vacation cabin near Cacapon State
                 Park — Phil knows this market and will work tirelessly on your
                 behalf.
@@ -375,7 +375,7 @@ export default function HomePage() {
             Ready to Buy or Sell in WV?
           </h2>
           <p className="text-slate-300 text-lg mb-8">
-            Let's talk about your real estate goals. Phil is available to answer
+            Let&apos;s talk about your real estate goals. Phil is available to answer
             questions, provide a free home valuation, or help you start your
             property search.
           </p>
