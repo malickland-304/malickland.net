@@ -1,0 +1,23 @@
+---
+description: Stop wv-property-intelligence production work in the separate Next.js checkout
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Separate Project: Not Current MalickLand Production
+
+This checkout is the separate `malickland.net` Next.js experiment/prototype. It is not the current `malickland.net` production stack.
+
+If the request mentions current MalickLand production website work, `wv-property-intelligence`, Railway real-estate deployment, `/listings`, `/37-advent`, `/wv/*-county`, or production fixes:
+
+1. Stop before reading, editing, committing, pushing, or deploying.
+2. Tell Phil to use Cursor at `/Users/yhyh7/Projects/wv-property-intelligence`.
+3. Do not infer production state from this checkout.
+
+Canonical production repo:
+
+- `/Users/yhyh7/Projects/wv-property-intelligence`
+- GitHub: `malickland-304/wv-property-intelligence`
+- Stack: Express 5, SQLite, vanilla HTML in `app/`, Railway deploy
+- Health URL: `https://malickland.net/api/health`
