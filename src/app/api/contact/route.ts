@@ -1,71 +1,83 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import {
+  buildContactSubject,
+  formatContactEmail,
+  validateContactPayload,
+} from "./validation";
 
-export async function POST(req: NextRequest) {
+function getGmailConfig() {
+  const user = process.env.GMAIL_USER?.trim();
+  const pass = process.env.GMAIL_APP_PASSWORD?.trim();
+
+  if (!user || !pass) return null;
+  return { user, pass };
+}
+
+export async function POST(req: Request) {
+  let body: unknown;
+
   try {
-    const body = await req.json();
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      inquiryType,
-      propertyType,
-      county,
-      budget,
-      message,
-      preferredContact,
-    } = body;
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Request body must be valid JSON." },
+      { status: 400 }
+    );
+  }
 
-    if (!firstName || !email || !message) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
+  const validation = validateContactPayload(body);
+  if (!validation.ok) {
+    return NextResponse.json(
+      {
+        error: "Please correct the highlighted fields.",
+        fields: validation.errors,
+      },
+      { status: 400 }
+    );
+  }
 
+  const gmail = getGmailConfig();
+  if (!gmail) {
+    console.error("Contact form mail is not configured.");
+    return NextResponse.json(
+      {
+        error:
+          "The contact form is temporarily unavailable. Please call Phil directly.",
+      },
+      { status: 503 }
+    );
+  }
+
+  try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
+        user: gmail.user,
+        pass: gmail.pass,
       },
     });
 
-    const emailBody = `
-New Contact Form Submission — MalickLand.net
-============================================
-
-Name:              ${firstName} ${lastName}
-Email:             ${email}
-Phone:             ${phone || "Not provided"}
-Preferred Contact: ${preferredContact || "Not specified"}
-
-Inquiry Type:      ${inquiryType || "Not specified"}
-Property Type:     ${propertyType || "Not specified"}
-County:            ${county || "Not specified"}
-Budget:            ${budget || "Not specified"}
-
-Message:
-${message}
-
-============================================
-Submitted via malickland.net contact form
-    `.trim();
+    const emailBody = formatContactEmail(validation.data);
 
     await transporter.sendMail({
-      from: `"MalickLand Contact Form" <${process.env.GMAIL_USER}>`,
-      to: process.env.GMAIL_USER,
-      replyTo: email,
-      subject: `New Inquiry from ${firstName} ${lastName} — ${inquiryType || "General"}`,
+      from: `"MalickLand Contact Form" <${gmail.user}>`,
+      to: gmail.user,
+      replyTo: validation.data.email,
+      subject: buildContactSubject(validation.data),
       text: emailBody,
     });
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Contact form error:", err);
+    console.error("Contact form mail send failed:", {
+      message: err instanceof Error ? err.message : "Unknown error",
+    });
     return NextResponse.json(
-      { error: "Failed to send message. Please try again." },
+      {
+        error:
+          "Failed to send message. Please try calling or emailing directly.",
+      },
       { status: 500 }
     );
   }
