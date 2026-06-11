@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import ContactForm from './ContactForm'
+import { serviceInterestFromParam } from './contact-options'
 
 export const metadata: Metadata = {
   title: 'Contact | MalickLand — WV Real Estate Agency',
@@ -16,7 +17,20 @@ const counties = [
   'Mineral County',
 ]
 
-export default function ContactPage() {
+type ContactPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function ContactPage({ searchParams }: ContactPageProps) {
+  const params = searchParams ? await searchParams : {}
+  const defaultServiceInterest = serviceInterestFromParam(
+    firstParam(params.service) || firstParam(params.offer)
+  )
+
   return (
     <>
       {/* ── Hero ── */}
@@ -60,9 +74,9 @@ export default function ContactPage() {
       <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-          {/* ── Contact Form (client component with Formspree) ── */}
+          {/* ── Contact Form ── */}
           <div className="lg:col-span-2">
-            <ContactForm />
+            <ContactForm defaultServiceInterest={defaultServiceInterest} />
           </div>
 
           {/* ── Sidebar ── */}

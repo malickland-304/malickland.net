@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+*.codex-backup-*
 /.pnp
 .pnp.js
 

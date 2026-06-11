@@ -13,6 +13,7 @@ import {
   Landmark,
   ArrowRight,
 } from "lucide-react";
+import { serviceOffers } from "./services/offers";
 
 // ─── Stats ───────────────────────────────────────────────────────────────────
 const stats = [
@@ -250,6 +251,46 @@ export default function HomePage() {
               );
             })}
           </div>
+
+          <div className="mt-14 border-t border-slate-200 pt-10">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-[#1C3A1C]">
+                  Start With a Clear Offer
+                </h3>
+                <p className="text-slate-500 mt-2 max-w-2xl">
+                  Three direct lanes for buyers, sellers, owners, and investors
+                  who need a practical next step.
+                </p>
+              </div>
+              <Link
+                href="/services"
+                className="text-sm font-bold text-[#1C3A1C] hover:text-[#C4A040] transition-colors inline-flex items-center gap-2"
+              >
+                View all offers <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {serviceOffers.map((offer) => (
+                <Link
+                  key={offer.slug}
+                  href={`/services/${offer.slug}`}
+                  className="bg-white rounded-xl p-5 border border-slate-200 hover:border-[#C4A040]/60 hover:shadow-md transition-all group"
+                >
+                  <h4 className="font-bold text-[#1C3A1C] mb-2 group-hover:text-[#C4A040] transition-colors">
+                    {offer.shortTitle}
+                  </h4>
+                  <p className="text-sm text-slate-500 leading-relaxed mb-4">
+                    {offer.outcome}
+                  </p>
+                  <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1C3A1C]">
+                    Open offer <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -296,7 +337,7 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-[#1C3A1C] to-[#254E25] rounded-2xl p-8 text-white">
+            <div className="bg-linear-to-br from-[#1C3A1C] to-[#254E25] rounded-2xl p-8 text-white">
               <h3 className="font-bold text-xl mb-6 text-[#D4B050]">
                 Why Choose MalickLand?
               </h3>

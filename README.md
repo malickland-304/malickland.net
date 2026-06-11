@@ -24,6 +24,10 @@
 | Route | Description |
 |-------|-------------|
 | `/` | Homepage — Hero, Services, About snippet, Testimonials |
+| `/services` | Service offers — Deal Facilitation plus MEDjAi report/checkup offers |
+| `/services/deal-facilitation` | MalickLand deal facilitation offer |
+| `/services/property-intelligence-report` | MEDjAi property intelligence report offer |
+| `/services/seller-readiness-checkup` | MEDjAi seller readiness checkup offer |
 | `/listings` | Property listings with search/filter |
 | `/about` | Phil Malick bio, expertise, WV counties served |
 | `/contact` | Contact form, office hours, areas served |
@@ -39,7 +43,15 @@ App runs at `http://localhost:3000`
 
 ## Environment Variables
 
-No env vars required for this static marketing site. Future API integrations (MLS, form submission) will use `.env.local`.
+Copy `.env.example` to `.env.local` for local development and fill in only the values needed for the feature you are testing.
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `GMAIL_USER` | Contact form | Gmail account used by `/api/contact` as the sender and recipient. |
+| `GMAIL_APP_PASSWORD` | Contact form | Gmail app password used by Nodemailer. Do not use or commit the normal account password. |
+| `LISTINGS_API_URL` | Optional | Overrides the default listings API URL used by `/listings`. |
+
+Never commit real secrets or production credentials.
 
 ## Related Repo
 

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MalickLand — Listing Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root { --forest: #1C3A1C; --forest-dark: #142814; --forest-light: #254E25; --gold: #C4A040; --gold-light: #D4B050; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .photo-drop { border: 2px dashed var(--gold); transition: all .2s; }
+    .photo-drop.over { background: rgba(196,160,64,.08); border-color: var(--gold-light); }
+    .spinner { display:inline-block; border:3px solid #e5e7eb; border-top:3px solid var(--forest); border-radius:50%; width:18px; height:18px; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .log { font-family: 'Courier New', monospace; font-size: 11px; }
+    /* Yard sign print target */
+    @media print {
+      .no-print { display: none !important; }
+      .print-target { display: block !important; }
+      body { margin: 0; }
+    }
+    .thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 2px solid transparent; cursor: pointer; }
+    .thumb.selected { border-color: var(--gold); }
+    .tab-btn { transition: all .15s; }
+    .tab-btn.active { background: var(--forest); color: white; }
+    #preview-social .social-bg { background-size: cover; background-position: center; }
+    .input-base { width:100%; border:1px solid #d1d5db; border-radius:6px; padding:8px 10px; font-size:13px; outline:none; transition: border-color .15s; }
+    .input-base:focus { border-color: var(--forest); box-shadow: 0 0 0 2px rgba(28,58,28,.12); }
+    label.lbl { font-size:12px; font-weight:600; color:#374151; display:block; margin-bottom:4px; }
+    .card-preview { background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.12); max-width:380px; margin:0 auto; }
+    .section-card { background:white; border-radius:10px; border:1px solid #e5e7eb; padding:20px; }
+    .feature-tag { display:inline-flex; align-items:center; gap:4px; background:#f0fdf4; border:1px solid #86efac; color:#166534; border-radius:20px; padding:3px 10px; font-size:12px; }
+    .feature-tag button { color:#4ade80; background:none; border:none; cursor:pointer; font-size:14px; line-height:1; padding:0; }
+    .publish-btn { background: var(--forest); color:white; border:none; border-radius:8px; padding:12px 28px; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; transition: background .15s; }
+    .publish-btn:hover { background: var(--forest-dark); }
+    .publish-btn:disabled { background:#9ca3af; cursor:not-allowed; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen pb-20">
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header class="no-print sticky top-0 z-50 bg-[#1C3A1C] text-white shadow-xl">
+  <div class="max-w-screen-2xl mx-auto px-5 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <svg viewBox="0 0 100 100" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50,16 L50,4 C28,4 2,20 2,50 C2,80 28,96 50,96 L50,84 C32,80 14,67 14,50 C14,33 32,20 50,16 Z" fill="#142814"/>
+        <path d="M50,16 L50,4 C72,4 98,20 98,50 C98,80 72,96 50,96 L50,84 C68,80 86,67 86,50 C86,33 68,20 50,16 Z" fill="#142814"/>
+        <circle cx="50" cy="50" r="34" fill="#C4A040"/>
+        <path d="M17,68 L28,32 L36,46 L43,24 L50,14 L57,24 L64,46 L72,32 L83,68 Z" fill="#1C3A1C"/>
+        <path d="M28,32 L32,42 L36,36" fill="white"/>
+        <path d="M44,26 L47,34 L50,28 L53,34 L56,26 L52,32 L50,18 L48,32 Z" fill="white"/>
+        <path d="M64,46 L68,36 L72,32" fill="white"/>
+        <path d="M38,68 C32,72 31,80 36,85 C40,89 60,89 64,85 C69,80 68,72 62,68 C57,64 43,64 38,68 Z" fill="#1C3A1C"/>
+      </svg>
+      <div>
+        <div class="font-bold text-base leading-tight">MalickLand</div>
+        <div class="text-[9px] text-green-300 tracking-widest uppercase">Listing Manager v2</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleConfig()" id="config-toggle-btn" class="flex items-center gap-1.5 text-xs text-green-200 hover:text-white border border-green-700 px-3 py-1.5 rounded transition-colors" title="Settings">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Config
+      </button>
+      <button onclick="resetForm()" class="text-xs text-green-200 hover:text-white border border-green-700 px-3 py-1.5 rounded transition-colors">+ New</button>
+      <div id="save-status" class="text-xs text-green-300 hidden"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ CONFIG PANEL ═══════════════════════ -->
+<div id="config-panel" class="hidden no-print bg-[#0F2A0F] border-b border-[#254E25] text-white px-5 py-4">
+  <div class="max-w-screen-2xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div>
+      <label class="text-[10px] text-green-300 uppercase tracking-wider block mb-1">Cloudflare Worker URL</label>
+      <input id="cfg-cf-url" type="url" placeholder="https://malickland.net" class="w-full bg-[#1C3A1C] border border-[#254E25] text-white text-xs px-3 py-2 rounded focus:outline-none focus:border-[#C4A040]" oninput="saveConfig()" />
+    </div>
+    <div>
+      <label class="text-[10px] text-green-300 uppercase tracking-wider block mb-1">Worker API Token <span class="text-red-400">*secret*</span></label>
+      <input id="cfg-cf-token" type="password" placeholder="your-secret-token" class="w-full bg-[#1C3A1C] border border-[#254E25] text-white text-xs px-3 py-2 rounded focus:outline-none focus:border-[#C4A040]" oninput="saveConfig()" />
+    </div>
+    <div>
+      <label class="text-[10px] text-green-300 uppercase tracking-wider block mb-1">Google Apps Script URL</label>
+      <input id="cfg-gs-url" type="url" placeholder="https://script.google.com/..." class="w-full bg-[#1C3A1C] border border-[#254E25] text-white text-xs px-3 py-2 rounded focus:outline-none focus:border-[#C4A040]" oninput="saveConfig()" />
+    </div>
+    <div>
+      <label class="text-[10px] text-green-300 uppercase tracking-wider block mb-1">Agent Phone</label>
+      <input id="cfg-phone" type="tel" placeholder="(540) 246-1421" class="w-full bg-[#1C3A1C] border border-[#254E25] text-white text-xs px-3 py-2 rounded focus:outline-none focus:border-[#C4A040]" oninput="saveConfig()" />
+    </div>
+  </div>
+  <p class="text-[10px] text-green-500 mt-2 max-w-screen-2xl mx-auto">Config is saved locally in your browser. Never share the token.</p>
+</div>
+
+<!-- ═══════════════════════ MAIN LAYOUT ═══════════════════════ -->
+<div class="max-w-screen-2xl mx-auto px-4 py-5 grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+  <!-- ──────── LEFT: FORM ──────── -->
+  <div class="space-y-4 no-print">
+
+    <!-- Basic Info -->
+    <div class="section-card">
+      <h2 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+        <span class="bg-[#1C3A1C] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">1</span>
+        Basic Information
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="sm:col-span-2">
+          <label class="lbl">Listing Title / Address *</label>
+          <input id="f-title" type="text" placeholder="123 River Road" class="input-base" oninput="onFieldChange()" />
+        </div>
+        <div>
+          <label class="lbl">Price *</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+            <input id="f-price" type="number" placeholder="185000" class="input-base pl-7" oninput="onFieldChange()" />
+          </div>
+        </div>
+        <div>
+          <label class="lbl">Status</label>
+          <select id="f-status" class="input-base" onchange="onFieldChange()">
+            <option value="Active">Active</option>
+            <option value="Pending">Pending</option>
+            <option value="Sold">Sold</option>
+            <option value="Off Market">Off Market</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Property Type</label>
+          <select id="f-type" class="input-base" onchange="onTypeChange()">
+            <option value="Residential">Residential</option>
+            <option value="Land">Land / Acreage</option>
+            <option value="Farm">Farm / Ranch</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Multi-Family">Multi-Family</option>
+            <option value="Cabin">Cabin / Vacation</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">County</label>
+          <select id="f-county" class="input-base" onchange="onFieldChange()">
+            <option value="">Select county...</option>
+            <option value="Hampshire County">Hampshire County</option>
+            <option value="Hardy County">Hardy County</option>
+            <option value="Morgan County">Morgan County</option>
+            <option value="Berkeley County">Berkeley County</option>
+            <option value="Jefferson County">Jefferson County</option>
+            <option value="Mineral County">Mineral County</option>
+            <option value="Grant County">Grant County</option>
+            <option value="Pendleton County">Pendleton County</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">City / Town</label>
+          <input id="f-city" type="text" placeholder="Romney" class="input-base" oninput="onFieldChange()" />
+        </div>
+        <div>
+          <label class="lbl">ZIP Code</label>
+          <input id="f-zip" type="text" placeholder="26757" maxlength="5" class="input-base" oninput="onFieldChange()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Property Details -->
+    <div class="section-card">
+      <h2 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+        <span class="bg-[#1C3A1C] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">2</span>
+        Property Details
+      </h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="detail-fields">
+        <div id="field-beds">
+          <label class="lbl">Bedrooms</label>
+          <input id="f-beds" type="number" min="0" max="99" placeholder="3" class="input-base" oninput="onFieldChange()" />
+        </div>
+        <div id="field-baths">
+          <label class="lbl">Bathrooms</label>
+          <input id="f-baths" type="number" min="0" max="99" step="0.5" placeholder="2" class="input-base" oninput="onFieldChange()" />
+        </div>
+        <div id="field-sqft">
+          <label class="lbl">Sq Ft</label>
+          <input id="f-sqft" type="number" placeholder="1800" class="input-base" oninput="onFieldChange()" />
+        </div>
+        <div>
+          <label class="lbl">Acres</label>
+          <input id="f-acres" type="number" step="0.01" placeholder="2.5" class="input-base" oninput="onFieldChange()" />
+        </div>
+      </div>
+      <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <label class="lbl">Year Built</label>
+          <input id="f-year" type="number" placeholder="1998" class="input-base" oninput="onFieldChange()" />
+        </div>
+        <div>
+          <label class="lbl">Garage</label>
+          <select id="f-garage" class="input-base" onchange="onFieldChange()">
+            <option value="">None</option>
+            <option value="1-Car Garage">1-Car Garage</option>
+            <option value="2-Car Garage">2-Car Garage</option>
+            <option value="Detached Garage">Detached Garage</option>
+            <option value="Carport">Carport</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Water</label>
+          <select id="f-water" class="input-base" onchange="onFieldChange()">
+            <option value="">Unknown</option>
+            <option value="Public Water">Public Water</option>
+            <option value="Well Water">Well Water</option>
+            <option value="Spring">Spring</option>
+            <option value="Creek">Creek</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Sewer</label>
+          <select id="f-sewer" class="input-base" onchange="onFieldChange()">
+            <option value="">Unknown</option>
+            <option value="Public Sewer">Public Sewer</option>
+            <option value="Septic System">Septic System</option>
+            <option value="Perc Approved">Perc Approved</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="section-card">
+      <h2 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+        <span class="bg-[#1C3A1C] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">3</span>
+        Description
+      </h2>
+      <textarea id="f-desc" rows="5" placeholder="Describe this property — location, highlights, condition, access, views, and any unique features..." class="input-base resize-none" oninput="onFieldChange()"></textarea>
+      <div class="text-right text-xs text-gray-400 mt-1"><span id="desc-count">0</span> chars</div>
+    </div>
+
+    <!-- Features -->
+    <div class="section-card">
+      <h2 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+        <span class="bg-[#1C3A1C] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">4</span>
+        Features &amp; Highlights
+      </h2>
+      <div class="flex gap-2 mb-3">
+        <input id="feature-input" type="text" placeholder="Add feature (e.g. Mountain Views)" class="input-base flex-1" onkeydown="if(event.key==='Enter'){addFeature();event.preventDefault()}" />
+        <button onclick="addFeature()" class="bg-[#1C3A1C] text-white px-4 py-2 rounded text-sm font-medium hover:bg-[#142814] transition-colors">Add</button>
+      </div>
+      <!-- Quick presets -->
+      <div class="flex flex-wrap gap-1.5 mb-3" id="preset-features">
+        <!-- Populated by JS -->
+      </div>
+      <div id="features-list" class="flex flex-wrap gap-2 min-h-[32px]"></div>
+    </div>
+
+    <!-- Photos -->
+    <div class="section-card">
+      <h2 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+        <span class="bg-[#1C3A1C] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">5</span>
+        Photos <span class="font-normal text-gray-400 text-xs ml-1">(max 10, auto-compressed)</span>
+      </h2>
+      <div id="photo-drop" class="photo-drop rounded-xl p-6 text-center cursor-pointer hover:bg-[#f0fdf4] transition-colors" onclick="document.getElementById('photo-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <svg class="w-10 h-10 text-[#C4A040] mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <p class="text-sm text-gray-500">Drag &amp; drop photos or <span class="text-[#1C3A1C] font-semibold">click to browse</span></p>
+        <p class="text-xs text-gray-400 mt-1">JPEG, PNG, WEBP — compressed automatically to ~100KB each</p>
+      </div>
+      <input id="photo-input" type="file" accept="image/*" multiple class="hidden" onchange="handleFileInput(event)" />
+      <div id="photo-grid" class="flex flex-wrap gap-2 mt-3"></div>
+      <div id="photo-progress" class="hidden mt-2">
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <div class="spinner"></div>
+          <span id="photo-progress-text">Processing images...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slug preview -->
+    <div class="section-card bg-gray-50">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex-1">
+          <label class="lbl">Listing URL (auto-generated)</label>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-gray-400 text-sm">malickland.net/listing/</span>
+            <input id="f-slug" type="text" class="input-base flex-1 font-mono text-sm" placeholder="auto-generated-slug" oninput="onFieldChange()" />
+          </div>
+        </div>
+        <button onclick="refreshSlug()" class="mt-5 text-xs text-[#1C3A1C] border border-[#1C3A1C] px-3 py-1.5 rounded hover:bg-[#1C3A1C] hover:text-white transition-colors whitespace-nowrap">Re-generate</button>
+      </div>
+    </div>
+
+  </div><!-- END LEFT -->
+
+  <!-- ──────── RIGHT: PREVIEW PANEL ──────── -->
+  <div class="xl:sticky xl:top-16 h-fit space-y-4">
+
+    <!-- Preview tabs -->
+    <div class="section-card no-print">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex gap-1 bg-gray-100 p-1 rounded-lg">
+          <button class="tab-btn active text-xs font-semibold px-3 py-1.5 rounded-md" onclick="switchTab('card', this)">Card</button>
+          <button class="tab-btn text-xs font-semibold px-3 py-1.5 rounded-md text-gray-500" onclick="switchTab('yardsign', this)">Yard Sign</button>
+          <button class="tab-btn text-xs font-semibold px-3 py-1.5 rounded-md text-gray-500" onclick="switchTab('flyer', this)">Flyer</button>
+          <button class="tab-btn text-xs font-semibold px-3 py-1.5 rounded-md text-gray-500" onclick="switchTab('social', this)">Social</button>
+        </div>
+        <button onclick="updatePreviews()" class="text-xs text-[#1C3A1C] hover:underline">↻ Refresh</button>
+      </div>
+
+      <!-- CARD PREVIEW -->
+      <div id="preview-card">
+        <div class="card-preview" id="card-content">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- YARD SIGN PREVIEW -->
+      <div id="preview-yardsign" class="hidden">
+        <div id="yardsign-content" class="mx-auto" style="max-width:360px;">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- FLYER PREVIEW -->
+      <div id="preview-flyer" class="hidden overflow-y-auto" style="max-height:600px;">
+        <div id="flyer-content">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- SOCIAL PREVIEW -->
+      <div id="preview-social" class="hidden">
+        <div id="social-content" class="mx-auto" style="max-width:360px;">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code + Actions -->
+    <div class="section-card no-print">
+      <h3 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider mb-3">QR Code &amp; Exports</h3>
+      <div class="flex gap-4 items-start">
+        <div>
+          <div id="qr-container" class="bg-white border border-gray-200 rounded-lg p-2" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;">
+            <span class="text-gray-300 text-xs text-center">Generate QR after save</span>
+          </div>
+          <p id="qr-url" class="text-[10px] text-gray-400 mt-1 text-center break-all" style="max-width:120px;"></p>
+        </div>
+        <div class="flex-1 space-y-2">
+          <button onclick="generateQRCode()" class="w-full text-xs border border-[#1C3A1C] text-[#1C3A1C] px-3 py-2 rounded hover:bg-[#1C3A1C] hover:text-white transition-colors font-medium">Generate QR Code</button>
+          <button onclick="exportJSON()" class="w-full text-xs border border-gray-300 text-gray-600 px-3 py-2 rounded hover:bg-gray-50 transition-colors font-medium">Export JSON</button>
+          <button onclick="downloadHTML()" class="w-full text-xs border border-gray-300 text-gray-600 px-3 py-2 rounded hover:bg-gray-50 transition-colors font-medium">Download HTML</button>
+          <button onclick="printFlyer()" class="w-full text-xs border border-gray-300 text-gray-600 px-3 py-2 rounded hover:bg-gray-50 transition-colors font-medium">🖨 Print Flyer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Log -->
+    <div class="section-card no-print">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-bold text-[#1C3A1C] text-sm uppercase tracking-wider">Activity Log</h3>
+        <button onclick="clearLog()" class="text-[10px] text-gray-400 hover:text-gray-600">Clear</button>
+      </div>
+      <div id="status-log" class="log bg-[#0F1F0F] text-green-400 rounded-lg p-3 h-32 overflow-y-auto text-[11px]">
+        <div class="text-green-600">→ Ready. Fill in listing details and click Save &amp; Publish.</div>
+      </div>
+    </div>
+
+  </div><!-- END RIGHT -->
+</div>
+
+<!-- ═══════════════════════ BOTTOM ACTION BAR ═══════════════════════ -->
+<div class="no-print fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 px-5 py-3">
+  <div class="max-w-screen-2xl mx-auto flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+      <span id="listing-status-badge" class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Active</span>
+      <span id="listing-title-badge" class="font-medium text-gray-700 truncate max-w-48">New Listing</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="publish-result" class="text-sm hidden"></div>
+      <button id="save-btn" onclick="saveAndPublish()" class="publish-btn">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Save &amp; Publish
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const S = {
+  config: {
+    cfUrl: 'https://malickland.net',
+    cfToken: '',
+    gsUrl: '',
+    phone: '(540) 246-1421',
+  },
+  listing: {},
+  images: [],       // { dataUrl, name, size }
+  features: [],
+  activeTab: 'card',
+};
+
+// ─── PRESETS ─────────────────────────────────────────────────────────────────
+const FEATURE_PRESETS = [
+  'Mountain Views', 'Creek Frontage', 'River Frontage', 'Road Frontage',
+  'Hardwood Floors', 'Central A/C', 'Heat Pump', 'Wood Stove', 'Fireplace',
+  'Covered Porch', 'Deck', 'Detached Garage', 'Barn', 'Workshop',
+  'Unrestricted', 'Mineral Rights', 'Timber', 'Open Fields',
+  'Hunting', 'Fishing', 'Spring Water', 'Near Town', 'Mountain Access',
+  'Updated Kitchen', 'Updated Bathrooms', 'New Roof', 'Move-In Ready',
+];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  loadConfig();
+  renderPresets();
+  resetListing();
+  updatePreviews();
+  // Debounce preview updates
+  document.querySelectorAll('.input-base, select').forEach(el => {
+    el.addEventListener('input', debounce(updatePreviews, 300));
+  });
+}
+
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+function loadConfig() {
+  try {
+    const c = JSON.parse(localStorage.getItem('ml_config') || '{}');
+    S.config = { ...S.config, ...c };
+    if (c.cfUrl) document.getElementById('cfg-cf-url').value = c.cfUrl;
+    if (c.cfToken) document.getElementById('cfg-cf-token').value = c.cfToken;
+    if (c.gsUrl) document.getElementById('cfg-gs-url').value = c.gsUrl;
+    if (c.phone) document.getElementById('cfg-phone').value = c.phone;
+  } catch(e) {}
+}
+
+function saveConfig() {
+  S.config.cfUrl = document.getElementById('cfg-cf-url').value.trim().replace(/\/$/, '');
+  S.config.cfToken = document.getElementById('cfg-cf-token').value.trim();
+  S.config.gsUrl = document.getElementById('cfg-gs-url').value.trim();
+  S.config.phone = document.getElementById('cfg-phone').value.trim() || '(540) 246-1421';
+  localStorage.setItem('ml_config', JSON.stringify(S.config));
+}
+
+function toggleConfig() {
+  const p = document.getElementById('config-panel');
+  p.classList.toggle('hidden');
+}
+
+// ─── FORM HELPERS ─────────────────────────────────────────────────────────────
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function n(id) { const x = parseFloat(document.getElementById(id)?.value); return isNaN(x) ? null : x; }
+
+function onFieldChange() {
+  const title = v('f-title');
+  document.getElementById('listing-title-badge').textContent = title || 'New Listing';
+  document.getElementById('listing-status-badge').textContent = v('f-status') || 'Active';
+  document.getElementById('desc-count').textContent = v('f-desc').length;
+  autoSlug();
+}
+
+function autoSlug() {
+  const existing = v('f-slug');
+  // Only auto-generate if slug is empty or was previously auto-generated
+  const slug = generateSlug(v('f-title'), v('f-city'));
+  if (slug) document.getElementById('f-slug').value = slug;
+}
+
+function refreshSlug() {
+  const slug = generateSlug(v('f-title'), v('f-city'));
+  if (slug) document.getElementById('f-slug').value = slug;
+}
+
+function onTypeChange() {
+  const type = v('f-type');
+  const isLand = type === 'Land' || type === 'Farm';
+  ['field-beds', 'field-baths', 'field-sqft'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.opacity = isLand ? '0.4' : '1';
+  });
+  onFieldChange();
+}
+
+function generateSlug(title, city) {
+  const raw = [title, city, 'WV'].filter(Boolean).join(' ');
+  return raw.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 64) || '';
+}
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function collectListing() {
+  return {
+    id: S.listing.id || generateId(),
+    slug: v('f-slug') || generateSlug(v('f-title'), v('f-city')),
+    title: v('f-title'),
+    address: v('f-title'),
+    city: v('f-city'),
+    county: v('f-county'),
+    state: 'WV',
+    zip: v('f-zip'),
+    price: n('f-price'),
+    type: v('f-type'),
+    status: v('f-status'),
+    beds: n('f-beds'),
+    baths: n('f-baths'),
+    sqft: n('f-sqft'),
+    acres: n('f-acres'),
+    yearBuilt: v('f-year') || null,
+    garage: v('f-garage') || null,
+    water: v('f-water') || null,
+    sewer: v('f-sewer') || null,
+    description: v('f-desc'),
+    features: [...S.features],
+    images: S.images.map(i => i.dataUrl),
+    agentName: 'Phil Malick',
+    agentPhone: S.config.phone || '(540) 246-1421',
+    agentEmail: 'phil@malickland.net',
+    agentWebsite: S.config.cfUrl || 'https://malickland.net',
+    createdAt: S.listing.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+// ─── FEATURES ─────────────────────────────────────────────────────────────────
+function renderPresets() {
+  const container = document.getElementById('preset-features');
+  container.innerHTML = FEATURE_PRESETS.map(f =>
+    `<button onclick="togglePreset('${f}')" class="preset-btn text-xs bg-gray-100 hover:bg-[#1C3A1C] hover:text-white text-gray-600 px-2.5 py-1 rounded-full transition-colors" data-feature="${f}">${f}</button>`
+  ).join('');
+}
+
+function togglePreset(f) {
+  if (S.features.includes(f)) {
+    S.features = S.features.filter(x => x !== f);
+  } else {
+    S.features.push(f);
+  }
+  syncPresetButtons();
+  renderFeatureTags();
+  updatePreviews();
+}
+
+function addFeature() {
+  const inp = document.getElementById('feature-input');
+  const val = inp.value.trim();
+  if (val && !S.features.includes(val)) {
+    S.features.push(val);
+    inp.value = '';
+    syncPresetButtons();
+    renderFeatureTags();
+    updatePreviews();
+  }
+}
+
+function removeFeature(f) {
+  S.features = S.features.filter(x => x !== f);
+  syncPresetButtons();
+  renderFeatureTags();
+  updatePreviews();
+}
+
+function syncPresetButtons() {
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    const f = btn.dataset.feature;
+    if (S.features.includes(f)) {
+      btn.classList.add('bg-[#1C3A1C]', 'text-white');
+      btn.classList.remove('bg-gray-100', 'text-gray-600');
+    } else {
+      btn.classList.remove('bg-[#1C3A1C]', 'text-white');
+      btn.classList.add('bg-gray-100', 'text-gray-600');
+    }
+  });
+}
+
+function renderFeatureTags() {
+  document.getElementById('features-list').innerHTML = S.features.map(f =>
+    `<span class="feature-tag">${f}<button onclick="removeFeature('${f.replace(/'/g, "\\'")}')" title="Remove">×</button></span>`
+  ).join('');
+}
+
+// ─── IMAGE HANDLING ────────────────────────────────────────────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('photo-drop').classList.add('over'); }
+function handleDragLeave(e) { document.getElementById('photo-drop').classList.remove('over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('photo-drop').classList.remove('over');
+  handleImageFiles(Array.from(e.dataTransfer.files));
+}
+function handleFileInput(e) { handleImageFiles(Array.from(e.target.files)); }
+
+async function handleImageFiles(files) {
+  if (S.images.length >= 10) { log('✗ Maximum 10 photos allowed.'); return; }
+  const toAdd = files.filter(f => f.type.startsWith('image/')).slice(0, 10 - S.images.length);
+  if (!toAdd.length) return;
+
+  document.getElementById('photo-progress').classList.remove('hidden');
+  for (let i = 0; i < toAdd.length; i++) {
+    document.getElementById('photo-progress-text').textContent = `Compressing ${i+1}/${toAdd.length}…`;
+    try {
+      const dataUrl = await compressImage(toAdd[i]);
+      const kb = Math.round(dataUrl.length * 0.75 / 1024);
+      S.images.push({ dataUrl, name: toAdd[i].name, size: kb });
+      log(`✓ ${toAdd[i].name} → ${kb} KB`);
+    } catch(e) { log(`✗ Error compressing ${toAdd[i].name}`); }
+  }
+  document.getElementById('photo-progress').classList.add('hidden');
+  document.getElementById('photo-input').value = '';
+  renderPhotoGrid();
+  updatePreviews();
+}
+
+async function compressImage(file, maxWidth = 1200, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let { naturalWidth: w, naturalHeight: h } = img;
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+function renderPhotoGrid() {
+  document.getElementById('photo-grid').innerHTML = S.images.map((img, i) =>
+    `<div class="relative group">
+      <img src="${img.dataUrl}" class="thumb ${i===0?'selected':''}" onclick="setPrimaryPhoto(${i})" title="${img.name} (${img.size}KB)" />
+      ${i===0 ? '<span class="absolute top-0 left-0 bg-[#C4A040] text-white text-[9px] px-1 rounded-br-md">Cover</span>' : ''}
+      <button onclick="removePhoto(${i})" class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full items-center justify-center text-xs font-bold hidden group-hover:flex">×</button>
+    </div>`
+  ).join('');
+}
+
+function setPrimaryPhoto(i) {
+  const moved = S.images.splice(i, 1)[0];
+  S.images.unshift(moved);
+  renderPhotoGrid();
+  updatePreviews();
+}
+
+function removePhoto(i) {
+  S.images.splice(i, 1);
+  renderPhotoGrid();
+  updatePreviews();
+}
+
+// ─── PREVIEW RENDERING ────────────────────────────────────────────────────────
+function updatePreviews() {
+  const L = collectListing();
+  renderCard(L);
+  renderYardSign(L);
+  renderFlyer(L);
+  renderSocial(L);
+}
+
+function switchTab(tab, btn) {
+  S.activeTab = tab;
+  ['card','yardsign','flyer','social'].forEach(t => {
+    document.getElementById(`preview-${t}`).classList.add('hidden');
+  });
+  document.getElementById(`preview-${tab}`).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.classList.add('text-gray-500');
+  });
+  btn.classList.add('active');
+  btn.classList.remove('text-gray-500');
+}
+
+function formatPrice(p) {
+  if (!p) return 'Price TBD';
+  return '$' + Number(p).toLocaleString();
+}
+
+function statBadge(val, label) {
+  if (!val) return '';
+  return `<span class="flex items-center gap-1 text-gray-600 text-sm"><span class="font-semibold text-gray-800">${val}</span> ${label}</span>`;
+}
+
+function coverImg(L, w=400, h=240) {
+  if (L.images && L.images[0]) {
+    return `<img src="${L.images[0]}" style="width:100%;height:${h}px;object-fit:cover;" alt="${L.title}" />`;
+  }
+  return `<div style="width:100%;height:${h}px;background:linear-gradient(135deg,#1C3A1C,#254E25);display:flex;align-items:center;justify-content:center;">
+    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+  </div>`;
+}
+
+// CARD
+function renderCard(L) {
+  const el = document.getElementById('card-content');
+  if (!L) L = collectListing();
+  const stats = [
+    L.beds ? `${L.beds} BD` : '',
+    L.baths ? `${L.baths} BA` : '',
+    L.sqft ? `${Number(L.sqft).toLocaleString()} SF` : '',
+    L.acres ? `${L.acres} AC` : '',
+  ].filter(Boolean).join(' · ');
+
+  el.innerHTML = `
+    <div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:system-ui,sans-serif;">
+      <div style="position:relative;">${coverImg(L,400,200)}
+        <div style="position:absolute;top:10px;left:10px;display:flex;gap:6px;">
+          <span style="background:${L.status==='Active'?'#16a34a':L.status==='Pending'?'#d97706':'#6b7280'};color:white;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${L.status||'Active'}</span>
+          <span style="background:rgba(28,58,28,.8);color:white;font-size:11px;padding:3px 10px;border-radius:20px;">${L.type||'Residential'}</span>
+        </div>
+        <div style="position:absolute;bottom:10px;right:10px;background:#C4A040;color:white;font-weight:700;padding:5px 12px;border-radius:8px;font-size:15px;">${formatPrice(L.price)}</div>
+      </div>
+      <div style="padding:16px;">
+        <h3 style="font-weight:700;color:#1C3A1C;font-size:15px;margin:0 0 4px;">${L.title||'Property Address'}</h3>
+        <p style="color:#6b7280;font-size:12px;margin:0 0 10px;">📍 ${[L.city,L.county,'WV'].filter(Boolean).join(' · ')}</p>
+        ${stats ? `<div style="display:flex;gap:12px;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;padding:8px 0;margin-bottom:10px;font-size:12px;color:#374151;">${stats}</div>` : ''}
+        ${L.description ? `<p style="color:#6b7280;font-size:12px;line-height:1.5;margin:0 0 12px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${L.description}</p>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;padding-top:10px;">
+          <span style="font-size:11px;color:#9ca3af;">MalickLand · WV Real Estate</span>
+          <span style="font-size:11px;color:#1C3A1C;font-weight:600;">${L.agentPhone||'(540) 246-1421'}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// YARD SIGN
+function renderYardSign(L) {
+  const el = document.getElementById('yardsign-content');
+  if (!L) L = collectListing();
+  const city = L.city ? `${L.city}, WV` : 'West Virginia';
+
+  el.innerHTML = `
+    <div style="background:#1C3A1C;border:6px solid #C4A040;border-radius:8px;overflow:hidden;font-family:system-ui,sans-serif;text-align:center;padding:24px 20px;">
+      <div style="color:#C4A040;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;">FOR SALE</div>
+      <div style="color:white;font-size:22px;font-weight:900;letter-spacing:1px;margin-bottom:4px;">MalickLand</div>
+      <div style="color:#86efac;font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-bottom:18px;">WV Real Estate Agency</div>
+      <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:14px;margin-bottom:16px;">
+        <div style="color:white;font-size:13px;font-weight:600;margin-bottom:2px;">${L.title||'Property Address'}</div>
+        <div style="color:#9ca3af;font-size:11px;">${city}</div>
+        ${L.price ? `<div style="color:#C4A040;font-size:20px;font-weight:900;margin-top:8px;">${formatPrice(L.price)}</div>` : ''}
+        ${L.acres ? `<div style="color:#86efac;font-size:11px;margin-top:2px;">${L.acres} Acres</div>` : ''}
+      </div>
+      <div style="color:#C4A040;font-size:16px;font-weight:800;letter-spacing:1px;margin-bottom:4px;">${L.agentPhone||'(540) 246-1421'}</div>
+      <div style="color:#9ca3af;font-size:10px;">malickland.net</div>
+    </div>`;
+}
+
+// FLYER
+function renderFlyer(L) {
+  const el = document.getElementById('flyer-content');
+  if (!L) L = collectListing();
+  const stats = [
+    L.beds ? `<div style="text-align:center;padding:8px;background:#f8fdf8;border-radius:6px;border:1px solid #dcfce7;"><div style="font-size:18px;font-weight:800;color:#1C3A1C;">${L.beds}</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Beds</div></div>` : '',
+    L.baths ? `<div style="text-align:center;padding:8px;background:#f8fdf8;border-radius:6px;border:1px solid #dcfce7;"><div style="font-size:18px;font-weight:800;color:#1C3A1C;">${L.baths}</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Baths</div></div>` : '',
+    L.sqft ? `<div style="text-align:center;padding:8px;background:#f8fdf8;border-radius:6px;border:1px solid #dcfce7;"><div style="font-size:18px;font-weight:800;color:#1C3A1C;">${Number(L.sqft).toLocaleString()}</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Sq Ft</div></div>` : '',
+    L.acres ? `<div style="text-align:center;padding:8px;background:#f8fdf8;border-radius:6px;border:1px solid #dcfce7;"><div style="font-size:18px;font-weight:800;color:#1C3A1C;">${L.acres}</div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Acres</div></div>` : '',
+  ].filter(Boolean);
+
+  const photos = (L.images || []).slice(0, 4);
+  const photoGrid = photos.length > 1
+    ? `<div style="display:grid;grid-template-columns:repeat(${Math.min(photos.length,3)},1fr);gap:4px;margin-bottom:16px;">
+        ${photos.map(p => `<img src="${p}" style="width:100%;height:120px;object-fit:cover;border-radius:4px;" />`).join('')}
+       </div>`
+    : photos.length === 1 ? `<img src="${photos[0]}" style="width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;" />` : '';
+
+  el.innerHTML = `
+    <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;font-family:system-ui,sans-serif;max-width:680px;margin:0 auto;">
+      <div style="background:#1C3A1C;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="color:white;font-size:18px;font-weight:900;">MalickLand</div>
+          <div style="color:#86efac;font-size:9px;letter-spacing:3px;text-transform:uppercase;">WV Real Estate Agency</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#C4A040;font-size:22px;font-weight:800;">${formatPrice(L.price)}</div>
+          ${L.status ? `<div style="background:${L.status==='Active'?'#16a34a':'#d97706'};color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;display:inline-block;">${L.status}</div>` : ''}
+        </div>
+      </div>
+      <div style="padding:20px;">
+        <h2 style="color:#1C3A1C;font-size:19px;font-weight:800;margin:0 0 4px;">${L.title||'Property Address'}</h2>
+        <p style="color:#6b7280;font-size:12px;margin:0 0 16px;">📍 ${[L.city,L.county,'West Virginia'].filter(Boolean).join(', ')}</p>
+        ${photoGrid}
+        ${stats.length ? `<div style="display:grid;grid-template-columns:repeat(${stats.length},1fr);gap:8px;margin-bottom:16px;">${stats.join('')}</div>` : ''}
+        ${L.description ? `<p style="color:#374151;font-size:13px;line-height:1.6;margin-bottom:16px;border-left:3px solid #C4A040;padding-left:12px;">${L.description}</p>` : ''}
+        ${S.features.length ? `
+          <div style="margin-bottom:16px;">
+            <div style="font-weight:700;color:#1C3A1C;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Highlights</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${S.features.map(f => `<span style="background:#f0fdf4;border:1px solid #86efac;color:#166534;border-radius:20px;padding:3px 10px;font-size:11px;">${f}</span>`).join('')}
+            </div>
+          </div>` : ''}
+        <div style="background:#f8fdf8;border:1px solid #dcfce7;border-radius:8px;padding:14px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;color:#1C3A1C;font-size:13px;">${L.agentName||'Phil Malick'}</div>
+            <div style="color:#6b7280;font-size:11px;">WV Licensed Real Estate Agent</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;color:#1C3A1C;font-size:13px;">${L.agentPhone||'(540) 246-1421'}</div>
+            <div style="color:#6b7280;font-size:11px;">${L.agentEmail||'phil@malickland.net'}</div>
+          </div>
+        </div>
+        ${L.slug ? `<p style="text-align:center;color:#9ca3af;font-size:10px;margin-top:10px;">malickland.net/listing/${L.slug}</p>` : ''}
+      </div>
+    </div>`;
+}
+
+// SOCIAL (1:1 square)
+function renderSocial(L) {
+  const el = document.getElementById('social-content');
+  if (!L) L = collectListing();
+  const hasCover = L.images && L.images[0];
+
+  el.innerHTML = `
+    <div style="width:360px;height:360px;position:relative;border-radius:12px;overflow:hidden;font-family:system-ui,sans-serif;background:#1C3A1C;">
+      ${hasCover
+        ? `<img src="${L.images[0]}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" /><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 50%,transparent 100%);"></div>`
+        : `<div style="position:absolute;inset:0;background:linear-gradient(135deg,#1C3A1C,#254E25);"></div>`}
+      <div style="position:absolute;top:14px;left:14px;background:${L.status==='Active'?'#16a34a':'#d97706'};color:white;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">${L.status||'Active'}</div>
+      <div style="position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);color:white;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;">${L.type||'Residential'}</div>
+      <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;">
+        <div style="color:white;font-size:24px;font-weight:800;line-height:1.1;margin-bottom:6px;">${formatPrice(L.price)}</div>
+        <div style="color:rgba(255,255,255,.9);font-size:13px;font-weight:600;margin-bottom:3px;">${L.title||'Property Address'}</div>
+        <div style="color:rgba(255,255,255,.65);font-size:11px;margin-bottom:10px;">${[L.city,'WV'].filter(Boolean).join(', ')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.2);padding-top:8px;">
+          <span style="color:white;font-size:12px;font-weight:700;">MalickLand</span>
+          <span style="color:#C4A040;font-size:12px;font-weight:600;">${L.agentPhone||'(540) 246-1421'}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── QR CODE ─────────────────────────────────────────────────────────────────
+function generateQRCode() {
+  const L = collectListing();
+  const slug = L.slug || generateSlug(L.title, L.city) || 'listing';
+  const url = `${S.config.cfUrl || 'https://malickland.net'}/listing/${slug}`;
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  container.style.cssText = 'width:120px;height:120px;display:flex;align-items:center;justify-content:center;background:white;border-radius:8px;border:1px solid #e5e7eb;padding:6px;';
+  try {
+    new QRCode(container, {
+      text: url, width: 108, height: 108,
+      colorDark: '#1C3A1C', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+    document.getElementById('qr-url').textContent = url;
+    log(`✓ QR generated → ${url}`);
+  } catch(e) { log('✗ QR failed: ' + e.message); }
+}
+
+// ─── SAVE & PUBLISH ────────────────────────────────────────────────────────────
+async function saveAndPublish() {
+  const L = collectListing();
+  if (!L.title) { showError('Please enter a listing title/address.'); return; }
+  if (!L.price) { showError('Please enter a price.'); return; }
+  if (!S.config.cfUrl && !S.config.gsUrl) {
+    showError('Configure at least one endpoint in Settings (⚙).');
+    return;
+  }
+
+  S.listing.id = L.id;
+  S.listing.createdAt = L.createdAt;
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Publishing…';
+  document.getElementById('publish-result').classList.add('hidden');
+
+  log('🚀 Starting publish…');
+  const results = { cf: false, gs: false };
+
+  // ── 1. Cloudflare Worker
+  if (S.config.cfUrl) {
+    log(`→ Cloudflare: ${S.config.cfUrl}/api/save`);
+    try {
+      const res = await fetch(`${S.config.cfUrl}/api/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${S.config.cfToken}`,
+        },
+        body: JSON.stringify(L),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json.success) {
+        results.cf = true;
+        log(`✓ Live: ${S.config.cfUrl}/listing/${L.slug}`);
+      } else { log(`✗ CF error: ${json.error || 'Unknown'}`); }
+    } catch(e) { log(`✗ CF failed: ${e.message}`); }
+  }
+
+  // ── 2. Google Sheets
+  if (S.config.gsUrl) {
+    log('→ Google Sheets...');
+    try {
+      // Google Apps Script requires no-cors for POST
+      await fetch(S.config.gsUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'listing', ...L }),
+      });
+      results.gs = true;
+      log('✓ Saved to Google Sheets');
+    } catch(e) { log(`✗ Google Sheets: ${e.message}`); }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Save &amp; Publish';
+
+  const res = document.getElementById('publish-result');
+  res.classList.remove('hidden');
+  if (results.cf || results.gs) {
+    res.innerHTML = `<span class="text-green-600 font-semibold text-sm">✓ Published!</span>`;
+    log('✅ Done!');
+    generateQRCode();
+  } else {
+    res.innerHTML = `<span class="text-red-500 font-semibold text-sm">⚠ Check log</span>`;
+  }
+}
+
+// ─── EXPORTS ─────────────────────────────────────────────────────────────────
+function exportJSON() {
+  const L = collectListing();
+  downloadBlob(new Blob([JSON.stringify(L, null, 2)], {type:'application/json'}), `${L.slug||'listing'}.json`);
+  log('✓ JSON exported');
+}
+
+function downloadHTML() {
+  const L = collectListing();
+  renderFlyer(L);
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + L.title + '</title><style>body{margin:0;font-family:system-ui,sans-serif;background:#f5f5f5;}@media print{body{background:white;}}</style></head><body style="padding:20px;">' + document.getElementById('flyer-content').innerHTML + '</body></html>';
+  downloadBlob(new Blob([html], {type:'text/html'}), `${L.slug||'listing'}.html`);
+  log('✓ HTML downloaded');
+}
+
+function printFlyer() {
+  switchTab('flyer', document.querySelectorAll('.tab-btn')[2]);
+  setTimeout(() => window.print(), 300);
+}
+
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function log(msg) {
+  const el = document.getElementById('status-log');
+  const time = new Date().toLocaleTimeString('en-US', {hour12:false});
+  el.innerHTML += `\n<div>[${time}] ${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('status-log').innerHTML = '<div class="text-green-600">→ Log cleared.</div>';
+}
+
+function showError(msg) {
+  log('⚠ ' + msg);
+  const btn = document.getElementById('save-btn');
+  btn.style.background = '#ef4444';
+  setTimeout(() => btn.style.background = '', 1500);
+}
+
+function resetForm() {
+  if (!confirm('Start a new listing? Current data will be cleared.')) return;
+  S.images = [];
+  S.features = [];
+  S.listing = {};
+  ['f-title','f-price','f-city','f-zip','f-beds','f-baths','f-sqft','f-acres','f-year','f-slug','f-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['f-status','f-type','f-county','f-garage','f-water','f-sewer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
+  renderPhotoGrid();
+  renderFeatureTags();
+  syncPresetButtons();
+  updatePreviews();
+  document.getElementById('listing-title-badge').textContent = 'New Listing';
+  document.getElementById('qr-container').innerHTML = '<span class="text-gray-300 text-xs text-center">QR after save</span>';
+  document.getElementById('qr-container').style.cssText = 'width:120px;height:120px;display:flex;align-items:center;justify-content:center;';
+  document.getElementById('qr-url').textContent = '';
+  log('→ New listing started.');
+}
+
+function resetListing() {
+  S.listing = { createdAt: null };
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

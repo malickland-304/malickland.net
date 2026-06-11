@@ -1,0 +1,50 @@
+name = "malickland-listings"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Account ──────────────────────────────────────────────────────────────────
+# Replace with your Cloudflare Account ID (found in Cloudflare dashboard)
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# ── KV Namespace ─────────────────────────────────────────────────────────────
+# Create with: npx wrangler kv:namespace create "LISTINGS"
+# Then paste the returned id below.
+[[kv_namespaces]]
+binding = "LISTINGS"
+id = "YOUR_KV_NAMESPACE_ID"
+# For local dev / preview:
+# preview_id = "YOUR_KV_PREVIEW_NAMESPACE_ID"
+
+# ── Environment Variables (Secrets) ──────────────────────────────────────────
+# Set secrets via CLI (NOT here — never commit secrets):
+#   npx wrangler secret put API_TOKEN
+#   npx wrangler secret put LEADS_WEBHOOK
+#
+# LEADS_WEBHOOK = your Google Apps Script URL for lead forwarding (optional)
+
+# ── Routes ───────────────────────────────────────────────────────────────────
+# Option A: Deploy as a standalone worker on a custom domain
+[[routes]]
+pattern = "malickland.net/listing/*"
+zone_name = "malickland.net"
+
+[[routes]]
+pattern = "malickland.net/listings"
+zone_name = "malickland.net"
+
+[[routes]]
+pattern = "malickland.net/api/*"
+zone_name = "malickland.net"
+
+# Option B: If using workers.dev subdomain (simpler, no custom domain needed)
+# workers_dev = true
+
+# ── Local Dev Server ─────────────────────────────────────────────────────────
+[dev]
+port = 8787
+local_protocol = "http"
+
+# ── Observability ────────────────────────────────────────────────────────────
+[observability]
+enabled = true

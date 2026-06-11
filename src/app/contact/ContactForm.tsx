@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { serviceInterests } from "./contact-options";
 
 const counties = [
   "Berkeley County",
@@ -23,18 +24,36 @@ const propertyTypes = [
 ];
 
 const inquiryTypes = [
+  "Deal Facilitation",
   "Buying a Property",
   "Selling a Property",
+  "Property Intelligence Report",
+  "Seller Readiness Checkup",
   "Property Valuation / CMA",
   "General Question",
   "Schedule a Showing",
 ];
 
+const timelineOptions = [
+  "ASAP",
+  "This week",
+  "30-60 days",
+  "60-90 days",
+  "Just researching",
+];
+
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
-export default function ContactForm() {
+type ContactFormProps = {
+  defaultServiceInterest?: string;
+};
+
+export default function ContactForm({
+  defaultServiceInterest = "",
+}: ContactFormProps) {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [serviceInterest, setServiceInterest] = useState(defaultServiceInterest);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,10 +68,12 @@ export default function ContactForm() {
       lastName: data.get("lastName"),
       email: data.get("email"),
       phone: data.get("phone"),
+      serviceInterest: data.get("serviceInterest"),
       inquiryType: data.get("inquiryType"),
       propertyType: data.get("propertyType"),
       county: data.get("county"),
       budget: data.get("budget"),
+      timeline: data.get("timeline"),
       message: data.get("message"),
       preferredContact: data.get("preferredContact"),
     };
@@ -169,6 +190,27 @@ export default function ContactForm() {
           </div>
         </div>
 
+        {/* Service interest */}
+        <div>
+          <label htmlFor="serviceInterest" className="block text-sm font-semibold text-gray-700 mb-1">
+            Service Interest
+          </label>
+          <select
+            id="serviceInterest"
+            name="serviceInterest"
+            value={serviceInterest}
+            onChange={(event) => setServiceInterest(event.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C4A040] focus:border-transparent bg-white"
+          >
+            <option value="">Select a service…</option>
+            {serviceInterests.map((service) => (
+              <option key={service} value={service}>
+                {service}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Inquiry type */}
         <div>
           <label htmlFor="inquiryType" className="block text-sm font-semibold text-gray-700 mb-1">
@@ -211,15 +253,33 @@ export default function ContactForm() {
           </div>
         </div>
 
-        {/* Budget */}
-        <div>
-          <label htmlFor="budget" className="block text-sm font-semibold text-gray-700 mb-1">
-            Budget / Price Range
-          </label>
-          <input
-            type="text" id="budget" name="budget" placeholder="e.g. $200,000 – $350,000"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C4A040] focus:border-transparent"
-          />
+        {/* Budget + timeline */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="budget" className="block text-sm font-semibold text-gray-700 mb-1">
+              Budget / Price Range
+            </label>
+            <input
+              type="text" id="budget" name="budget" placeholder="e.g. $200,000 – $350,000"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C4A040] focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label htmlFor="timeline" className="block text-sm font-semibold text-gray-700 mb-1">
+              Timeline
+            </label>
+            <select
+              id="timeline" name="timeline" defaultValue=""
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C4A040] focus:border-transparent bg-white"
+            >
+              <option value="">Select timeline…</option>
+              {timelineOptions.map((timeline) => (
+                <option key={timeline} value={timeline}>
+                  {timeline}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Message */}

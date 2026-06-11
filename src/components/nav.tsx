@@ -6,6 +6,7 @@ import { Menu, X, Phone } from "lucide-react";
 
 const links = [
   { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
   { href: "/listings", label: "Listings" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -53,7 +54,7 @@ export function Nav() {
   return (
     <header className="bg-[#1C3A1C] text-white shadow-lg sticky top-0 z-50">
       {/* Top bar */}
-      <div className="bg-[#142814] text-sm py-1.5">
+      <div className="hidden sm:block bg-[#142814] text-sm py-1.5">
         <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
           <span className="text-[#C4A040] font-medium">
             WV Licensed Real Estate Agent · WV Real Estate Agency
