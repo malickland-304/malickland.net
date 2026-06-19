@@ -60,9 +60,23 @@ Copy `.env.example` to `.env.local` for local development and fill in only the v
 |----------|----------|---------|
 | `GMAIL_USER` | Contact form | Gmail account used by `/api/contact` as the sender and recipient. |
 | `GMAIL_APP_PASSWORD` | Contact form | Gmail app password used by Nodemailer. Do not use or commit the normal account password. |
+| `CONTACT_RATE_LIMIT_MAX_REQUESTS` | Optional | Maximum `/api/contact` requests allowed per client window. Defaults to `5`. |
+| `CONTACT_RATE_LIMIT_WINDOW_SECONDS` | Optional | `/api/contact` rate-limit window in seconds. Defaults to `600`. |
+| `CONTACT_RATE_LIMIT_TRUST_PROXY_HEADERS` | Production contact form | Set to `true` only when the hosting/proxy layer strips or overwrites inbound IP headers. When unset, requests share an anonymous limiter key instead of trusting client-supplied headers. |
+| `CONTACT_RATE_LIMIT_REDIS_REST_URL` | Production contact form | Redis REST endpoint for durable cross-instance `/api/contact` rate limiting. |
+| `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN` | Production contact form | Bearer token for the Redis REST endpoint. Keep secret. |
+| `CONTACT_RATE_LIMIT_REDIS_TIMEOUT_MS` | Optional | Redis REST limiter timeout in milliseconds. Defaults to `1500`. |
 | `LISTINGS_API_URL` | Optional | Overrides the default listings API URL used by `/listings`. |
 
 Never commit real secrets or production credentials.
+
+`/api/contact` uses an in-memory rate limiter when Redis REST configuration is
+absent. That fallback is useful for local development or a single long-running
+Node process, but production deployments should configure the Redis REST values
+so limits are shared across serverless instances and restarts. If only one Redis
+REST value is configured, or if Redis does not answer before the configured
+timeout, the contact route fails closed with a temporary unavailable response
+instead of silently running without the durable limiter.
 
 ## Related Repo
 

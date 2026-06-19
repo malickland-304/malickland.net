@@ -1,5 +1,37 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-19 - Codex
+
+### Objective
+
+Add focused `/api/contact` abuse protection without changing deployment topology or merging the dependency/analytics lane.
+
+### Changes Made
+
+- Added a rate-limit gate before `/api/contact` parses request JSON or sends Gmail mail.
+- Added a Redis REST rate-limit backend for durable production use through `CONTACT_RATE_LIMIT_REDIS_REST_URL` and `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`.
+- Uses provider-validated IP headers before spoofable `X-Forwarded-For` and a fixed Redis window key to avoid sliding-window lockout.
+- Requires `CONTACT_RATE_LIMIT_TRUST_PROXY_HEADERS=true` before trusting proxy IP headers and adds a bounded Redis REST timeout.
+- Added an in-memory limiter fallback for local development and single long-running Node processes.
+- Added fail-closed behavior for incomplete Redis REST configuration or limiter backend errors.
+- Refactored the contact route behind a sibling `handler.ts` module so route behavior can be tested without invalid App Router exports or real email.
+- Added route-level tests for allowed submissions, rate-limited submissions, trusted proxy IP precedence, fail-closed limiter errors, and Redis limiter timeout.
+- Updated `.env.example`, `README.md`, `SECURITY.md`, `PROJECT_STATE.md`, and `TASKS.md` with the rate-limit behavior and production deployment assumptions.
+
+### Verification
+
+- `npm run test:contact` passed 15/15 tests across validation, attribution, and route-level abuse behavior after rebasing on PR #9.
+- Scoped ESLint passed for `src/app/api/contact/route.ts`, `src/app/api/contact/route.test.ts`, `src/app/api/contact/validation.ts`, `src/app/api/contact/validation.test.ts`, `next.config.ts`, and `eslint.config.mjs`.
+- `npm run build` passed with Next.js 16.2.6 and generated the expected static/dynamic routes.
+- `git diff --check` passed.
+- Bare `npm run lint` was stopped after reproducing the known main-branch hang from the unmerged dependency/lint lane.
+- `npm audit --omit=dev` and full `npm audit` still report the known `nodemailer` and dev-tooling advisories already addressed by PR #7; those dependency changes were intentionally not mixed into this focused contact-abuse branch.
+
+### Remaining Risks
+
+- Production still needs the Redis REST URL/token configured before relying on cross-instance contact rate limiting. Without those env values, the route uses the documented in-memory fallback.
+- No production deployment was performed.
+
 ## 2026-06-19 - Claude
 
 ### Objective

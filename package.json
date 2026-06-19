@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint src next.config.ts eslint.config.mjs",
-    "test:contact": "node --experimental-strip-types --test src/app/api/contact/validation.test.ts"
+    "test:contact": "node --experimental-strip-types --test src/app/api/contact/validation.test.ts src/app/api/contact/route.test.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
