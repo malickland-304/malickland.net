@@ -28,6 +28,31 @@ Capture the compliance implementation roadmap as canonical repo documentation an
 
 With owner confirmation of the 3 blockers, implement the lead attribution fields end-to-end (contact form + `/api/contact`) and verify against `LAUNCH_CHECKLIST.md` section B.
 
+## 2026-06-19 - Claude (lead attribution fields)
+
+### Objective
+
+Implement the Critical `TASKS.md` item "Add lead attribution fields end-to-end" — the unblocked dependency that gates the Step 2 revenue-cluster forms (`COMPLIANCE_ROADMAP.md` §1). Independent of the 3 owner blockers and of Codex's dependency/analytics lane.
+
+### Changes Made
+
+- `src/app/contact/ContactForm.tsx`: capture landing attribution once on mount (`sourcePath` = path+query, `serviceTag` from `?service`/`?offer`, the five `utm_*` params, `document.referrer`) and attach a submit-time `submittedAt` ISO timestamp to the posted payload under `attribution`.
+- `src/app/api/contact/validation.ts`: added `ContactAttribution` type, `ATTRIBUTION_FIELD_LIMITS`, and a lenient `sanitizeAttribution` that trims/truncates/drops bad values and **never** produces blocking errors (lead-safety gate: a tracking-field problem must never drop a real lead). `formatContactEmail` now renders a "Lead Source (attribution)" block and an optional authoritative server `Received At`.
+- `src/app/api/contact/route.ts`: passes `new Date().toISOString()` as the server `receivedAt`. The existing 400/503/500 error paths and the no-false-success guard are unchanged.
+- `src/app/api/contact/validation.test.ts`: +3 tests (echo of populated attribution incl. receivedAt; omission when absent; malformed attribution never blocks the lead).
+
+### Verification
+
+- `npm run test:contact` → 10/10 pass.
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` → compiled + TypeScript pass (listings 403 is the expected offline fallback).
+- `npm run lint` → 0 errors (4 pre-existing warnings in `listing-system/workers/worker.js`, untouched).
+- Code-side complete; `LAUNCH_CHECKLIST.md` §B remains a **live** gate (real inbox receipt + deploy env vars) and is intentionally left unchecked until a deployed test submission is verified.
+
+### Remaining Risks
+
+- Attribution is best-effort client capture: `document.referrer` and `utm_*` are absent on direct visits, so leads can legitimately arrive with sparse attribution (rendered as "Not specified").
+- Capture happens on `ContactForm` mount, so landing `utm_*`/path are lost if a visitor arrives on another page with UTMs and then navigates client-side to `/contact`. Tracked as a High-Priority follow-up (persist landing context in `sessionStorage` at first load); raised by gemini-code-assist on PR #9. Deferred per owner direction to stop new implementation at the publish blockers.
+
 ## 2026-06-02 - Codex
 
 ### Objective

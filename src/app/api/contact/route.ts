@@ -58,7 +58,10 @@ export async function POST(req: Request) {
       },
     });
 
-    const emailBody = formatContactEmail(validation.data);
+    const emailBody = formatContactEmail(
+      validation.data,
+      new Date().toISOString()
+    );
 
     await transporter.sendMail({
       from: `"MalickLand Contact Form" <${gmail.user}>`,
