@@ -110,8 +110,10 @@ Listing detail stays in the listing subsystem.
 **Step 4 — Depth & trust:** How It Works, About, county landing pages (research content),
 lead-magnet page (Buyer's Guide PDF from `public/`).
 
-**Step 5 — SEO/analytics:** GA4 site-wide; `RealEstateListing` / `LocalBusiness` JSON-LD; sitemap;
-Search Console; verify the social ≤2-click disclosure path.
+**Step 5 — SEO/analytics:** Vercel Analytics is now globally wired (handled in the separate
+dependency lane, not this docs PR); GA4 remains a separate future decision unless explicitly added.
+`RealEstateListing` / `LocalBusiness` JSON-LD; sitemap; Search Console; verify the social ≤2-click
+disclosure path.
 
 ### 2. Component build sequence
 
