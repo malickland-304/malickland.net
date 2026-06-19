@@ -1,3 +1,15 @@
+export type ContactAttribution = {
+  sourcePath?: string;
+  serviceTag?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+  referrer?: string;
+  submittedAt?: string;
+};
+
 export type ContactSubmission = {
   firstName: string;
   lastName?: string;
@@ -11,9 +23,11 @@ export type ContactSubmission = {
   timeline?: string;
   message: string;
   preferredContact?: string;
+  attribution?: ContactAttribution;
 };
 
-type ContactField = keyof ContactSubmission;
+type ContactField = Exclude<keyof ContactSubmission, "attribution">;
+type AttributionField = keyof ContactAttribution;
 
 export type ContactValidationError = {
   field: ContactField | "body";
@@ -39,8 +53,27 @@ export const CONTACT_FIELD_LIMITS: Record<ContactField, number> = {
   preferredContact: 40,
 };
 
+// Attribution is captured for lead-source analytics, not user-entered. It is
+// sanitized leniently and NEVER blocks a submission: a malformed or oversized
+// attribution value is truncated or dropped so a real lead can never be lost
+// to a tracking-field problem (lead-safety gate, COMPLIANCE_ROADMAP.md §1).
+export const ATTRIBUTION_FIELD_LIMITS: Record<AttributionField, number> = {
+  sourcePath: 512,
+  serviceTag: 120,
+  utmSource: 200,
+  utmMedium: 200,
+  utmCampaign: 200,
+  utmTerm: 200,
+  utmContent: 200,
+  referrer: 1024,
+  submittedAt: 40,
+};
+
 const REQUIRED_FIELDS: ContactField[] = ["firstName", "email", "message"];
 const CONTACT_FIELDS = Object.keys(CONTACT_FIELD_LIMITS) as ContactField[];
+const ATTRIBUTION_FIELDS = Object.keys(
+  ATTRIBUTION_FIELD_LIMITS
+) as AttributionField[];
 const EMAIL_PATTERN = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
 
@@ -64,6 +97,31 @@ function normalizeField(field: ContactField, value: string) {
   if (field === "message") return normalizeMessage(value);
   if (field === "email") return normalizeSingleLine(value).toLowerCase();
   return normalizeSingleLine(value);
+}
+
+function sanitizeAttribution(input: unknown): ContactAttribution | undefined {
+  if (!isRecord(input)) return undefined;
+
+  const attribution: ContactAttribution = {};
+
+  for (const field of ATTRIBUTION_FIELDS) {
+    const rawValue = input[field];
+    if (typeof rawValue !== "string") continue;
+
+    let value = normalizeSingleLine(rawValue);
+    if (!value) continue;
+
+    // submittedAt must be a parseable instant; drop it if it is not rather
+    // than rejecting the lead.
+    if (field === "submittedAt" && Number.isNaN(Date.parse(value))) continue;
+
+    const limit = ATTRIBUTION_FIELD_LIMITS[field];
+    if (value.length > limit) value = value.slice(0, limit);
+
+    attribution[field] = value;
+  }
+
+  return Object.keys(attribution).length > 0 ? attribution : undefined;
 }
 
 export function validateContactPayload(input: unknown): ContactValidationResult {
@@ -120,6 +178,8 @@ export function validateContactPayload(input: unknown): ContactValidationResult 
     return { ok: false, errors };
   }
 
+  const attribution = sanitizeAttribution(input.attribution);
+
   return {
     ok: true,
     data: {
@@ -135,6 +195,7 @@ export function validateContactPayload(input: unknown): ContactValidationResult 
       timeline: data.timeline,
       message: data.message!,
       preferredContact: data.preferredContact,
+      ...(attribution ? { attribution } : {}),
     },
   };
 }
@@ -143,8 +204,25 @@ function notSpecified(value: string | undefined) {
   return value || "Not specified";
 }
 
-export function formatContactEmail(data: ContactSubmission) {
+function formatAttribution(attribution: ContactAttribution | undefined) {
+  const a = attribution ?? {};
+  return `
+Lead Source (attribution)
+-----------------------------------------
+Source Page:       ${notSpecified(a.sourcePath)}
+Service Tag:       ${notSpecified(a.serviceTag)}
+UTM Source:        ${notSpecified(a.utmSource)}
+UTM Medium:        ${notSpecified(a.utmMedium)}
+UTM Campaign:      ${notSpecified(a.utmCampaign)}
+UTM Term:          ${notSpecified(a.utmTerm)}
+UTM Content:       ${notSpecified(a.utmContent)}
+Referrer:          ${notSpecified(a.referrer)}
+Submitted At:      ${notSpecified(a.submittedAt)}`.trimEnd();
+}
+
+export function formatContactEmail(data: ContactSubmission, receivedAt?: string) {
   const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ");
+  const receivedLine = receivedAt ? `\nReceived At:       ${receivedAt}` : "";
 
   return `
 New Contact Form Submission - MalickLand.net
@@ -165,8 +243,10 @@ Timeline:          ${notSpecified(data.timeline)}
 Message:
 ${data.message}
 
+${formatAttribution(data.attribution)}
+
 ============================================
-Submitted via malickland.net contact form
+Submitted via malickland.net contact form${receivedLine}
   `.trim();
 }
 
