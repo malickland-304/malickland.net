@@ -53,6 +53,48 @@ Implement the Critical `TASKS.md` item "Add lead attribution fields end-to-end" 
 - Attribution is best-effort client capture: `document.referrer` and `utm_*` are absent on direct visits, so leads can legitimately arrive with sparse attribution (rendered as "Not specified").
 - Capture happens on `ContactForm` mount, so landing `utm_*`/path are lost if a visitor arrives on another page with UTMs and then navigates client-side to `/contact`. Tracked as a High-Priority follow-up (persist landing context in `sessionStorage` at first load); raised by gemini-code-assist on PR #9. Deferred per owner direction to stop new implementation at the publish blockers.
 
+## 2026-06-19 - Codex
+
+### Objective
+
+Review and complete the latest site changes without changing the existing Next.js/Gmail/Nodemailer architecture.
+
+### Changes Made
+
+- Confirmed the active checkout as `malickland.net` at `/Users/yhyh7/Documents/Documents - Philip's MacBook Pro - 4/GitHub/malickland.net`, branch `main`.
+- Added `@vercel/analytics` to the npm dependency manifest and rendered `<Analytics />` from the App Router root layout.
+- Regenerated `package-lock.json` so the tracked npm lockfile includes the analytics package.
+- Removed stray untracked pnpm lock/workspace files and documented npm as the package manager of record.
+- Upgraded `nodemailer` to `^9.0.1` and `@types/nodemailer` to `^8.0.1` after `npm audit --omit=dev` reported a high-severity production advisory for `nodemailer <=9.0.0`.
+- Ran `npm audit fix --package-lock-only` to clear remaining dev/transitive advisories.
+- Tightened the default `npm run lint` script to the same source scope that is used as the reliable lint gate.
+- Marked the package as ESM with `"type": "module"` to match the TypeScript test module syntax and remove the native Node test warning.
+- Updated README, project state, security notes, task tracking, and this work log.
+
+### Verification
+
+- `npm ci --ignore-scripts --cache /private/tmp/npm-cache-codex` completed and reported 0 vulnerabilities.
+- `npm run lint` passed.
+- `npm run test:contact` passed 7/7 tests.
+- `npm run build` passed with Next.js 16.2.6.
+- `npm audit --omit=dev --json` reported 0 vulnerabilities.
+- `npm audit --json` reported 0 vulnerabilities.
+- `npm ls @vercel/analytics nodemailer @types/nodemailer next react react-dom --depth=0` reported `@vercel/analytics@2.0.1`, `nodemailer@9.0.1`, `@types/nodemailer@8.0.1`, `next@16.2.6`, `react@19.2.3`, and `react-dom@19.2.3`.
+- `next start` served the built site on `http://127.0.0.1:3132`; `curl -I /` returned `200 OK`.
+- Browser DOM QA verified the homepage title/content, no framework overlay, no console warnings/errors, and the expected navigation links.
+- Browser DOM QA verified `/contact` loads with expected contact form controls and no console warnings/errors.
+
+### Notes
+
+- In-app Browser screenshot capture timed out, Playwright's managed Chromium binary was not installed, and system Chrome headless launch was blocked by sandbox permissions. Visual screenshot evidence was therefore not captured in this pass, but DOM, console, route, build, lint, audit, and contact-test checks passed.
+- No Squarespace/Resend topology changes were made; the existing Next.js + Gmail/Nodemailer architecture remains the active repo truth.
+
+### Remaining Risks
+
+- `/api/contact` still needs durable production abuse/rate-limit controls.
+- Listings route ownership and `listing-system/` tracking remain unresolved.
+- Production deployment path and analytics data flow still need live verification after deploy.
+
 ## 2026-06-02 - Codex
 
 ### Objective
@@ -234,7 +276,7 @@ Resolve the main MalickLand checkout Next build/dev hang so the revenue pages ca
 
 ### Remaining Risks
 
-- Bare `npm run lint` still did not complete within about 30 seconds and was stopped. Scoped lint remains the reliable check until ESLint scan scope is tightened.
+- Superseded on 2026-06-19: the default `npm run lint` script now uses the reliable source scope and passes in the main checkout.
 - `node_modules.codex-backup-20260607-192749` remains in the repo directory as a recoverable backup but is ignored by git and excluded from TypeScript source scanning. Moving it out of the repo was attempted but was too slow in this synced checkout.
 
 ### Recommended Next Task

@@ -43,3 +43,17 @@ Alternatives considered: treating `wv-property-intelligence` as the active app o
 Security/performance impact: Reduces accidental deployment, data, and routing mistakes while the listing system is still unverified.
 
 Files affected: `ARCHITECTURE.md`, `PROJECT_STATE.md`, `TASKS.md`.
+
+## 2026-06-19 - Use Vercel Analytics As Current Implemented Analytics
+
+Problem: The site needed analytics instrumentation, while roadmap discussions also referenced GA4. The repo did not have a documented current analytics implementation.
+
+Decision: Install `@vercel/analytics` and wire `<Analytics />` globally in `src/app/layout.tsx`. Treat Vercel Analytics as the current implemented analytics path. GA4 remains a separate future decision and is not installed by this change.
+
+Reasoning: The app already targets a Vercel-compatible Next.js deployment path, and global App Router instrumentation gives page analytics without changing the contact flow, listing subsystem, or hosting topology.
+
+Alternatives considered: adding GA4 immediately, deferring analytics entirely, or moving to a Squarespace/Resend topology. GA4 is deferred until there is an explicit tracking requirement and property configuration; the topology swap is rejected by current architecture governance.
+
+Security/performance impact: Adds Vercel's client analytics script globally. No secrets or user-submitted contact data are added to committed files.
+
+Files affected: `package.json`, `package-lock.json`, `src/app/layout.tsx`, `ARCHITECTURE.md`, `PROJECT_STATE.md`, `README.md`, `WORK_LOG.md`.

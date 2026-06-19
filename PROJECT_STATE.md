@@ -1,6 +1,6 @@
 # Malickland 2.0 Project State
 
-Last updated: 2026-06-07
+Last updated: 2026-06-19
 
 ## Implemented
 
@@ -8,9 +8,11 @@ Last updated: 2026-06-07
 - Contact form UI posts to `/api/contact`.
 - `/api/contact` validates JSON payloads, trims and length-limits fields, validates email shape, preserves service-interest and timeline fields, checks Gmail env configuration, and sends email through Gmail via Nodemailer environment variables.
 - Public service-offer pages exist at `/services`, `/services/deal-facilitation`, `/services/property-intelligence-report`, and `/services/seller-readiness-checkup`; offer CTAs route to `/contact?service=...` for service-tagged lead intake.
+- Vercel Analytics is installed globally through the App Router root layout.
 - Listings page fetches listing JSON from `LISTINGS_API_URL` or `https://malickland.net/api/listings` and falls back to sample listings.
 - Listing subsystem exists locally under `listing-system/` with Cloudflare Worker, browser listing manager, and Google Apps Script backend.
 - `.gitignore` excludes local env files including `.env`, `.env*.local`, and generated Next.js output.
+- npm is the declared package manager; `package-lock.json` is the lockfile of record.
 
 ## Incomplete Or Unverified
 
@@ -24,10 +26,9 @@ Last updated: 2026-06-07
 ## Broken Or Risky
 
 - `npm audit --omit=dev` on 2026-05-27 initially found production advisories in `next@16.1.6`, transitive `postcss`, and `nodemailer@8.0.3`.
-- Dependency manifests now target `next@^16.2.6`, `eslint-config-next@^16.2.6`, `nodemailer@^8.0.9`, and override `postcss@^8.5.10`; `npm audit --omit=dev --json` reported 0 vulnerabilities after the change.
+- Dependency manifests now target `next@^16.2.6`, `eslint-config-next@^16.2.6`, `nodemailer@^9.0.1`, `@types/nodemailer@^8.0.1`, and override `postcss@^8.5.10`; `npm audit --omit=dev --json` and full `npm audit --json` reported 0 vulnerabilities on 2026-06-19.
 - The main mirrored checkout build/dev hang was resolved on 2026-06-07. Cause: backup dependency trees named like `node_modules.codex-backup-*` were inside the repo and were scanned by Tailwind/PostCSS and TypeScript. `.gitignore` and `tsconfig.json` now exclude `*.codex-backup-*`, and the real checkout passes production build and starts `next dev`.
-- Scoped lint now passes in the main checkout with `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs`.
-- Bare `npm run lint` still did not complete within about 30 seconds on 2026-06-07 and was stopped; lint configuration or scan scope still needs tightening before using bare `eslint` as a gate.
+- The default `npm run lint` script is scoped to `src next.config.ts eslint.config.mjs` and passes in the main checkout.
 - `/api/contact` still lacks durable production abuse/rate-limit controls.
 - Service pages and tagged intake are implemented locally, but production deployment path and analytics/lead tracking are not verified.
 - The Worker has permissive CORS (`Access-Control-Allow-Origin: *`) for API routes.

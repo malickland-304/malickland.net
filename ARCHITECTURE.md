@@ -1,6 +1,6 @@
 # Malickland 2.0 Architecture
 
-Last updated: 2026-06-07
+Last updated: 2026-06-19
 
 ## Current System
 
@@ -10,6 +10,7 @@ Malickland 2.0 is currently a public real-estate marketing website plus an untra
 
 - Framework: Next.js 16 App Router.
 - UI: React 19, TypeScript, Tailwind CSS v4, lucide-react icons.
+- Analytics: Vercel Analytics is globally wired in the App Router root layout through `@vercel/analytics/next`.
 - Routes:
   - `/`: public homepage.
   - `/services`: public service-offer index.
@@ -19,6 +20,7 @@ Malickland 2.0 is currently a public real-estate marketing website plus an untra
   - `/contact`: client contact form.
   - `/api/contact`: Next.js route handler that sends contact inquiries through Gmail via Nodemailer.
 - Hosting: README says Squarespace DNS to Cloudflare to Vercel or custom host. Current production topology must be verified before deployment changes.
+- Package manager: npm with `package-lock.json` as the lockfile of record.
 
 ## Listing System Subsystem
 
@@ -35,6 +37,7 @@ The `listing-system/` directory is currently untracked by git as of this audit. 
 2. Cloudflare Worker stores listing records in KV and updates the `__index` key.
 3. Worker optionally forwards lead data to a Google Apps Script webhook.
 4. Next.js `/listings` fetches JSON from `LISTINGS_API_URL` or `https://malickland.net/api/listings` with 60-second revalidation.
+5. Vercel Analytics collects page analytics from the global App Router layout when the app is deployed on a supported Vercel runtime. GA4 is not currently installed and remains a separate future decision.
 
 ## Architectural Stability
 
