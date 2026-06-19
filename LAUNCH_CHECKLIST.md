@@ -35,7 +35,7 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 ## C. Compliance gate (every page)
 
 - [ ] Global **footer disclosure** present: licensed-office identification + office address
-      (`501 E Main St, Romney, WV 26757`) + phone (`(540) 246-1421`). Confirm office wording against blocker A.
+      (`501 East Main Street, Romney, WV 26757`) + phone (`(540) 246-1421`). Confirm office wording against blocker A.
 - [ ] On **any page that names Phil**, § 174-1-17 satisfied (project interpretation — owner/legal to confirm wording):
   - [ ] Firm/broker lockup present and **half-size** compliant.
   - [ ] **Byline** rule met (title from blocker A).

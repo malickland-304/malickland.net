@@ -22,9 +22,13 @@ Next.js stack". Terminology mapping used throughout this document:
 | Browse Properties / hub embed  | Existing `/listings` route + Cloudflare Worker listing subsystem    |
 | Buyer's Guide PDF lead magnet  | Static asset served from `public/` + gated CTA                      |
 
-Brand note: the original roadmap specified forest green `#1E3A1E` / gold `#C4A84F`. The shipped
-app uses navy `#1e3a5f` / gold `#c8961e` (see `README.md`). The shipped palette is authoritative
-unless the owner directs a rebrand; treat the color change as an open owner decision, not a build step.
+Brand note: the shipped app already uses a **forest green `#1C3A1C`** (darker `#0F2A0F`/`#142814`,
+border `#254E25`) / **gold `#C4A040`** (light `#D4B050`) palette, hardcoded across the pages and
+components (`src/components/footer.tsx`, `src/components/nav.tsx`, `src/app/**/page.tsx`,
+`src/app/contact/ContactForm.tsx`). This palette is authoritative. Note: `src/app/globals.css` and
+`README.md` still define/list stale navy `--brand-*` tokens (`#1e3a5f` / `#c8961e`) that no longer
+match the implemented UI — reconciling or removing them is a cleanup item, not a rebrand. (The
+roadmap's earlier `#1E3A1E`/`#C4A84F` values were approximations of the real tokens above.)
 
 ## Standing gates (apply to every step)
 
@@ -45,8 +49,9 @@ descriptions below are the project's working interpretation, not legal advice.
 2. **NAR status** — whether Phil is a REALTOR® (NAR member). Determines whether the REALTOR®
    mark may be used anywhere on the site.
 3. **Licensed office** — the licensed brokerage name + office address that must appear in the
-   firm/broker lockup and footer. Repo currently shows `MalickLand Real Estate, 501 E Main St,
-   Romney, WV 26757` — confirm this is the licensed office of record and identify the responsible broker.
+   firm/broker lockup and footer. Repo footer currently shows `MalickLand` and `501 East Main
+   Street, Romney, WV 26757` — confirm the licensed office of record (full legal/brokerage name +
+   address) and identify the responsible broker.
 
 ---
 
@@ -84,8 +89,10 @@ descriptions below are the project's working interpretation, not legal advice.
 ### 1. Build order (sequenced, gated)
 
 **Step 0 — Foundations** (no public pages yet)
-- Design tokens: navy `#1e3a5f`, gold `#c8961e`, body text dark; typography + button styles via
-  Tailwind v4 CSS-first config. (Forest-green rebrand is an open owner decision, not in scope here.)
+- Design tokens: forest green `#1C3A1C` (dark `#0F2A0F`, border `#254E25`), gold `#C4A040`
+  (light `#D4B050`), body text dark; typography + button styles via Tailwind v4. These are
+  currently hardcoded across pages/components; reconcile the stale navy `--brand-*` tokens in
+  `globals.css` (cleanup, not a rebrand).
 - DNS/SSL sanity: Squarespace DNS → Cloudflare → Vercel/host topology verified before any deploy change.
 - Global header (nav) + global footer with the **locked disclosure** (office address + phone +
   licensed-office identification).
