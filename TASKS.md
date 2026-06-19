@@ -1,9 +1,12 @@
 # Malickland 2.0 Tasks
 
-Last updated: 2026-06-07
+Last updated: 2026-06-19
 
 ## Critical
 
+- [ ] Resolve the 3 compliance publish blockers - acceptance: owner confirms (1) Phil's licensed title/byline, (2) NAR/REALTOR® status, (3) licensed office of record + responsible broker; values recorded in `COMPLIANCE_ROADMAP.md` and `LAUNCH_CHECKLIST.md` section A - dependencies: human owner - status: open; gates go-live of any Phil-named page.
+- [ ] Add lead attribution fields end-to-end - acceptance: contact form includes hidden attribution fields (source page/path, service tag, UTM/referrer, timestamp) and `/api/contact` validates and echoes them; test lead received with all fields populated; failure path surfaces an error and does not report false success - dependencies: none - status: open; gates Step 2 revenue-cluster forms (`COMPLIANCE_ROADMAP.md` §1).
+- [ ] Implement compliance disclosure surfaces - acceptance: global footer disclosure (licensed office + address + phone) on every page; § 174-1-17 half-size firm/broker lockup, byline, and ≤2-click social disclosure path on any page naming Phil; owner/legal confirm wording - dependencies: the 3 compliance blockers - status: open.
 - [x] Remove production dependency audit blockers - acceptance: `npm audit --omit=dev` reports 0 production vulnerabilities or remaining advisories are documented with mitigation - verification: `npm audit --omit=dev --json` reported 0 vulnerabilities after narrow package updates and a `postcss` override - date/agent: 2026-05-27/Codex.
 - [x] Harden `/api/contact` input handling - acceptance: validates types, trims fields, enforces length limits, validates email shape, requires Gmail env vars before sending, avoids sensitive logs, and has targeted tests or documented manual verification - verification: `npm run test:contact`, scoped ESLint, `tsc --noEmit`, `npm audit --omit=dev`, and `npm run build` passed in `/tmp/malickland-contact-validate-20260602`; main checkout lint/type-check still hang and are not counted as passing - date/agent: 2026-06-02/Codex.
 - [ ] Resolve listings route ownership - acceptance: `ARCHITECTURE.md` and `DECISIONS.md` state whether Next.js or Cloudflare Worker owns `/listings`, and deployment routes match the decision - dependencies: production routing evidence - status: open.

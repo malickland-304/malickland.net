@@ -1,5 +1,33 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-19 - Claude
+
+### Objective
+
+Capture the compliance implementation roadmap as canonical repo documentation and produce a single pre-go-live launch gate, reconciling the roadmap (originally Squarespace + Resend) with the shipped Next.js + Gmail stack.
+
+### Changes Made
+
+- Reconciled a platform conflict: the roadmap assumed Squarespace + Resend; the repo is Next.js 16 + Gmail/Nodemailer with governance forbidding topology swaps without a documented decision. Per owner direction, re-targeted the roadmap onto the existing Next.js stack rather than switching platforms.
+- Added `COMPLIANCE_ROADMAP.md` — canonical Strategy → Method → Implementation, with a term-mapping table (Saved Sections → React components, Resend → `/api/contact`, hidden attribution fields → server-validated contact fields, etc.), the two standing gates, and the 3 publish blockers. Strategy/Method were reconstructed from existing repo docs and labeled as such; unverified items marked.
+- Added `LAUNCH_CHECKLIST.md` — single pre-go-live gate tying lead-safety + compliance into one pass/fail list (blockers, per-form lead-safety, per-page compliance, DoD, build/deploy verification, sign-off).
+- Recorded `DECISIONS.md` entry "2026-06-19 - Re-target Compliance Roadmap Onto Existing Next.js Stack".
+- Added 3 Critical tasks to `TASKS.md`: resolve the 3 compliance blockers, add lead attribution fields end-to-end, implement compliance disclosure surfaces.
+
+### Verification
+
+- Documentation-only change; no code, dependency, or build behavior modified. No build/lint/test gates were required or run for this change.
+- Brand/legal specifics (forest-green palette, § 174-1-17 exact wording, Phil's title/NAR/office) are recorded as open owner decisions, not asserted as facts.
+
+### Remaining Risks
+
+- The 3 compliance confirmations (title, NAR status, licensed office) remain open and gate go-live of any Phil-named page.
+- Attribution fields and compliance disclosure surfaces are documented as tasks but not yet implemented in code.
+
+### Recommended Next Task
+
+With owner confirmation of the 3 blockers, implement the lead attribution fields end-to-end (contact form + `/api/contact`) and verify against `LAUNCH_CHECKLIST.md` section B.
+
 ## 2026-06-02 - Codex
 
 ### Objective
