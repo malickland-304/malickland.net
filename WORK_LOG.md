@@ -51,6 +51,7 @@ Implement the Critical `TASKS.md` item "Add lead attribution fields end-to-end" 
 ### Remaining Risks
 
 - Attribution is best-effort client capture: `document.referrer` and `utm_*` are absent on direct visits, so leads can legitimately arrive with sparse attribution (rendered as "Not specified").
+- Capture happens on `ContactForm` mount, so landing `utm_*`/path are lost if a visitor arrives on another page with UTMs and then navigates client-side to `/contact`. Tracked as a High-Priority follow-up (persist landing context in `sessionStorage` at first load); raised by gemini-code-assist on PR #9. Deferred per owner direction to stop new implementation at the publish blockers.
 
 ## 2026-06-02 - Codex
 
