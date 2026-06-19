@@ -7,7 +7,9 @@
 - **Next.js 16** (App Router)
 - **React 19** + **TypeScript 5**
 - **Tailwind CSS v4** (CSS-first config, no `tailwind.config.js`)
+- **Vercel Analytics** via `@vercel/analytics`
 - Hosted via Squarespace DNS → Cloudflare → Vercel (or custom host)
+- Package manager: npm. Use `package-lock.json`; do not add pnpm/yarn lockfiles unless a documented package-manager decision changes this.
 
 ## Brand Colors
 
@@ -35,11 +37,20 @@
 ## Getting Started
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
 App runs at `http://localhost:3000`
+
+Useful checks:
+
+```bash
+npm run lint
+npm run test:contact
+npm run build
+npm audit
+```
 
 ## Environment Variables
 

@@ -1,6 +1,6 @@
 # Malickland 2.0 Security
 
-Last updated: 2026-06-02
+Last updated: 2026-06-19
 
 ## Security Principles
 
@@ -26,7 +26,7 @@ Last updated: 2026-06-02
 
 ## Current Immediate Risks
 
-- Production dependency advisories were found on 2026-05-27 in `next@16.1.6`, transitive `postcss`, and `nodemailer@8.0.3`; manifests were updated to `next@^16.2.6`, `nodemailer@^8.0.9`, `eslint-config-next@^16.2.6`, plus a `postcss@^8.5.10` override, and `npm audit --omit=dev --json` then reported 0 vulnerabilities.
+- Production dependency advisories were found on 2026-05-27 in `next@16.1.6`, transitive `postcss`, and `nodemailer@8.0.3`; a new `nodemailer <=9.0.0` advisory was found on 2026-06-19. Manifests now target `next@^16.2.6`, `nodemailer@^9.0.1`, `@types/nodemailer@^8.0.1`, `eslint-config-next@^16.2.6`, plus a `postcss@^8.5.10` override, and both `npm audit --omit=dev --json` and full `npm audit --json` reported 0 vulnerabilities on 2026-06-19.
 - `/api/contact` now validates JSON shape, text types, required fields, field lengths, email shape, trims/sanitizes input, checks Gmail configuration before sending, avoids logging submitted form data, and has repeatable validation tests.
 - `/api/contact` still needs durable production abuse protection such as rate limiting, bot mitigation, or provider-level controls.
 - Cloudflare Worker CORS is currently `*`; this may be too permissive for write-adjacent APIs.
@@ -38,6 +38,7 @@ Last updated: 2026-06-02
 ## Required Security Checks Before Production Readiness
 
 - `npm audit --omit=dev`
+- `npm audit`
 - Contact API validation and failure-path tests.
 - Contact API production abuse protection.
 - Worker payload size, field validation, CORS/origin, and XSS tests.
