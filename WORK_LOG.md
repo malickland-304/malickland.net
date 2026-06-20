@@ -1,5 +1,45 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-20 - Codex (production cutover gate)
+
+### Objective
+
+Record the owner-side production cutover gate after verifying that merged GitHub/Vercel work was not
+yet serving public `malickland.net` traffic.
+
+### Evidence
+
+- GitHub PR #10 was merged into `main` at `bbdc330` and Vercel reported a READY production
+  deployment for that commit.
+- Public DNS still routed `malickland.net` through Cloudflare to the older VPS app at
+  `31.97.58.203`; `www.malickland.net` resolved through Hostinger to the same IP and redirected to
+  the apex.
+- Live `https://malickland.net/api/health` and `/api/config` returned the old Express-style API.
+- Live `https://malickland.net/contact` redirected to `/#contact-form`.
+- Live `https://malickland.net/api/contact` returned `404`, while the old page still posted to
+  `/api/contacts`.
+- New Next.js routes such as `/services` and `/services/property-intelligence-report` returned
+  `404` on the live apex.
+
+### Changes Made
+
+- Added `LAUNCH_CHECKLIST.md` §F, an owner-side Cloudflare/Vercel cutover gate that requires the
+  Vercel deployment URL to be healthy before DNS changes, keeps listings ownership as a gate,
+  requires production env verification, and requires a real inbox-confirmed lead after cutover.
+- Added a Critical `TASKS.md` item for production cutover and live lead verification so the launch
+  blocker is visible beside the remaining listings ownership task.
+
+### Verification
+
+- Documentation-only change; no code, dependency, or production routing behavior modified.
+- No real lead was submitted because live traffic still targeted the old `/api/contacts` path rather
+  than the merged Next.js `/api/contact` route.
+
+### Remaining Risks
+
+- Cloudflare DNS and Vercel environment verification remain owner-side actions.
+- `Resolve listings route ownership` remains open and should gate production cutover.
+
 ## 2026-06-20 - Claude (compliance disclosure surfaces)
 
 ### Objective
