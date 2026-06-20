@@ -40,18 +40,18 @@ roadmap's earlier `#1E3A1E`/`#C4A84F` values were approximations of the real tok
 
 ## Publish blockers (owner confirmations — gate go-live of any Phil-named page)
 
-These three are unresolved. The build proceeds, but **no page that names Phil goes live** until
-all three are confirmed by the human owner. Legal/regulatory wording must be owner-confirmed; the
-descriptions below are the project's working interpretation, not legal advice.
+**Resolved 2026-06-20** — confirmed by the human owner as the established MalickLand
+information. Encoded as the single source of truth in `src/lib/compliance.ts`. The exact
+statutory byline/broker-of-record phrasing required by § 174-1-17 remains owner/legal-confirmable;
+the values below are the project's working interpretation, not legal advice.
 
-1. **Title** — Phil's exact licensed title/designation for the byline (e.g., salesperson,
-   associate broker, broker). Drives the byline text required by § 174-1-17.
-2. **NAR status** — whether Phil is a REALTOR® (NAR member). Determines whether the REALTOR®
-   mark may be used anywhere on the site.
-3. **Licensed office** — the licensed brokerage name + office address that must appear in the
-   firm/broker lockup and footer. Repo footer currently shows `MalickLand` and `501 East Main
-   Street, Romney, WV 26757` — confirm the licensed office of record (full legal/brokerage name +
-   address) and identify the responsible broker.
+1. **Title** — *confirmed:* **WV Licensed Real Estate Agent** (the designation the site already
+   uses). Drives the byline required by § 174-1-17.
+2. **NAR status** — *confirmed:* the **REALTOR® mark is not used** on the site; no NAR/REALTOR®
+   claim is made anywhere. The mark must not be added without a confirmed NAR membership.
+3. **Licensed office** — *confirmed:* **MalickLand — WV Real Estate Agency**, 501 East Main Street,
+   Romney, WV 26757, (540) 246-1421 — the established office of record used in the firm/broker
+   lockup and footer.
 
 ---
 

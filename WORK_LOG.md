@@ -1,5 +1,33 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-20 - Claude (compliance disclosure surfaces)
+
+### Objective
+
+Resolve the three compliance publish blockers (owner-confirmed) and implement the WV § 174-1-17 disclosure surfaces — the last open Critical items in `TASKS.md`.
+
+### Owner confirmation
+
+- Owner confirmed the established MalickLand information as the values for the three blockers: title "WV Licensed Real Estate Agent"; REALTOR® mark not used (no NAR/REALTOR® claim); office of record MalickLand — WV Real Estate Agency, 501 East Main Street, Romney, WV 26757, (540) 246-1421.
+
+### Changes Made
+
+- Added `src/lib/compliance.ts` — single source of truth (`LICENSED_OFFICE`) for the licensed-office identification, agent byline, and contact facts. REALTOR® mark intentionally absent.
+- Added `src/components/compliance.tsx` — `LicensedOfficeDisclosure` (global footer disclosure) and `FirmBrokerLockup` (firm name rendered at ≥ half the featured agent-name size for the § 174-1-17 half-size rule).
+- Rewired `src/components/footer.tsx` to render the formal licensed-office disclosure from the shared module and to source its brand/contact values from `LICENSED_OFFICE`. The footer renders on every page via the layout, so every Phil-named page carries the disclosure, and the footer social icons sit directly beside it (≤2-click path).
+- Recorded the confirmed values in `COMPLIANCE_ROADMAP.md` (publish blockers), `LAUNCH_CHECKLIST.md` §A + §C, and `TASKS.md` (both Critical compliance items marked done).
+
+### Verification
+
+- `npm run lint` → 0 errors.
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` → compiled + TypeScript pass (listings 403 is the expected offline fallback).
+- `npm run test:contact` → 15/15 pass.
+
+### Remaining Risks
+
+- The exact statutory byline / broker-of-record phrasing required by WV § 174-1-17 remains owner/legal-confirmable; this implements the project's working interpretation with owner-confirmed facts, not legal advice.
+- The ≤2-click social disclosure path is satisfied by the global footer but should be re-verified on the deployed site (`LAUNCH_CHECKLIST.md` §C).
+
 ## 2026-06-19 - Codex
 
 ### Objective

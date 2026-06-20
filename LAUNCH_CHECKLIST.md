@@ -11,9 +11,9 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 
 ## A. Publish blockers (must be RESOLVED before any Phil-named page goes live)
 
-- [ ] **Title confirmed** — Phil's exact licensed title/designation for the byline.
-- [ ] **NAR status confirmed** — REALTOR® membership yes/no; the REALTOR® mark is used only if yes.
-- [ ] **Licensed office confirmed** — licensed brokerage name + office address + responsible broker.
+- [x] **Title confirmed** — "WV Licensed Real Estate Agent" (owner-confirmed 2026-06-20).
+- [x] **NAR status confirmed** — REALTOR® mark not used; no NAR/REALTOR® claim made (owner-confirmed 2026-06-20).
+- [x] **Licensed office confirmed** — MalickLand — WV Real Estate Agency, 501 East Main Street, Romney, WV 26757, (540) 246-1421 (owner-confirmed 2026-06-20). Recorded in `src/lib/compliance.ts`. Exact statutory byline/broker-of-record wording remains owner/legal-confirmable.
 
 > Until all three are checked, pages that name Phil stay unpublished. Non-Phil pages may ship if
 > they pass sections B–E.
@@ -34,12 +34,12 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 
 ## C. Compliance gate (every page)
 
-- [ ] Global **footer disclosure** present: licensed-office identification + office address
-      (`501 East Main Street, Romney, WV 26757`) + phone (`(540) 246-1421`). Confirm office wording against blocker A.
-- [ ] On **any page that names Phil**, § 174-1-17 satisfied (project interpretation — owner/legal to confirm wording):
-  - [ ] Firm/broker lockup present and **half-size** compliant.
-  - [ ] **Byline** rule met (title from blocker A).
-  - [ ] Disclosure reachable in **≤ 2 clicks** from any social entry point.
+- [x] Global **footer disclosure** present: licensed-office identification + office address
+      (`501 East Main Street, Romney, WV 26757`) + phone (`(540) 246-1421`). Implemented in `src/components/footer.tsx` via `LicensedOfficeDisclosure`, sourced from `src/lib/compliance.ts`; renders on every page through the layout.
+- [x] On **any page that names Phil**, § 174-1-17 satisfied (project interpretation — owner/legal to confirm wording):
+  - [x] Firm/broker lockup present and **half-size** compliant (`FirmBrokerLockup` + footer disclosure; firm name rendered at ≥ half the agent-name size).
+  - [x] **Byline** rule met — "WV Licensed Real Estate Agent" from blocker A.
+  - [x] Disclosure reachable in **≤ 2 clicks** from any social entry point — footer social icons sit directly beside the global disclosure (0 clicks). *Live re-verify once deployed.*
 - [ ] MEDjAi offer pages carry the not-an-appraisal / informational-only disclaimer (already in `offers.ts`).
 
 ## D. Per-page Definition of Done (each public page)
