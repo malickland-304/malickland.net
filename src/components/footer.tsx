@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
+import { LICENSED_OFFICE } from "@/lib/compliance";
+import { LicensedOfficeDisclosure } from "@/components/compliance";
 
 function MalickLandIconSmall() {
   return (
@@ -17,7 +19,7 @@ function MalickLandIconSmall() {
 }
 
 export function Footer() {
-  const year = new Date().getFullYear();
+  const o = LICENSED_OFFICE;
 
   return (
     <footer className="bg-[#0F2A0F] text-slate-300">
@@ -28,9 +30,9 @@ export function Footer() {
             <div className="flex items-center gap-2 mb-4">
               <MalickLandIconSmall />
               <div>
-                <div className="font-bold text-white text-lg">MalickLand</div>
+                <div className="font-bold text-white text-lg">{o.firmName}</div>
                 <div className="text-[10px] text-green-300 tracking-widest uppercase">
-                  WV Real Estate Agency
+                  {o.firmTagline}
                 </div>
               </div>
             </div>
@@ -88,29 +90,29 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li>
                 <a
-                  href="tel:15402461421"
+                  href={o.phoneHref}
                   className="flex items-start gap-2 hover:text-[#D4B050] transition-colors"
                 >
                   <Phone className="w-4 h-4 mt-0.5 shrink-0 text-[#C4A040]" />
-                  (540) 246-1421
+                  {o.phoneDisplay}
                 </a>
               </li>
               <li>
                 <a
-                  href="mailto:phil@malickland.net"
+                  href={`mailto:${o.email}`}
                   className="flex items-start gap-2 hover:text-[#D4B050] transition-colors"
                 >
                   <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[#C4A040]" />
-                  phil@malickland.net
+                  {o.email}
                 </a>
               </li>
               <li>
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#C4A040]" />
                   <span>
-                    501 East Main Street
+                    {o.addressLine}
                     <br />
-                    Romney, WV 26757
+                    {o.cityStateZip}
                   </span>
                 </div>
               </li>
@@ -138,16 +140,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-[#254E25] mt-10 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-slate-500">
-          <p>
-            &copy; {year} MalickLand. All rights reserved. Phil Malick — WV
-            Licensed Real Estate Agent.
-          </p>
-          <p>
-            Equal Housing Opportunity. Information deemed reliable but not
-            guaranteed.
-          </p>
+        {/* Bottom bar — WV § 174-1-17 licensed-office disclosure (global) */}
+        <div className="border-t border-[#254E25] mt-10 pt-6 text-xs text-slate-500">
+          <LicensedOfficeDisclosure />
         </div>
       </div>
     </footer>
