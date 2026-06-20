@@ -20,7 +20,7 @@ export const LICENSED_OFFICE = {
   addressLine: "501 East Main Street",
   cityStateZip: "Romney, WV 26757",
   phoneDisplay: "(540) 246-1421",
-  phoneHref: "tel:15402461421",
+  phoneHref: "tel:+15402461421",
   email: "phil@malickland.net",
 } as const;
 
