@@ -1,6 +1,6 @@
 # Malickland 2.0 Project State
 
-Last updated: 2026-06-19
+Last updated: 2026-06-21
 
 ## Implemented
 
@@ -13,6 +13,7 @@ Last updated: 2026-06-19
 - Listing subsystem exists locally under `listing-system/` with Cloudflare Worker, browser listing manager, and Google Apps Script backend.
 - `.gitignore` excludes local env files including `.env`, `.env*.local`, and generated Next.js output.
 - npm is the declared package manager; `package-lock.json` is the lockfile of record.
+- Marketing content: `campaign/advent-dr/` holds a standalone, compliance-first social campaign kit for the current Advent Dr listing (copy, schedule, syndication/compliance checklist, tooling/automation guide, reusable prompt, disabled automation scaffold). Content only — no website route, deploy, or production-data change. Publishing is gated by `campaign/advent-dr/00-FACTS.md`.
 
 ## Incomplete Or Unverified
 

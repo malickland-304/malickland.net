@@ -1,5 +1,31 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-21 - Claude (Advent Dr social campaign kit)
+
+### Objective
+
+Build a compliance-first social media campaign kit for the current Advent Dr listing in Romney, WV, committed as standalone content (no production website changes). Owner authorized committing to this repo; corrected a draft brief that overstated "free" tooling and assumed free portal syndication.
+
+### Owner confirmation / context
+
+- Owner: this is the **current** Advent Dr listing, **not** the closed `37 Advent Dr` (which closed). Kit scoped accordingly and excludes the `/37-advent` production page.
+- Owner chose: commit kit to `malickland.net`; full content kit + ops/automation guide; use verified facts only (placeholders for anything unconfirmed).
+- Incorporated corrections (from owner + Codex review): accurate free-tier limits, no free-syndication assumption, manual-first, automation deferred.
+
+### Changes Made
+
+- Added `campaign/advent-dr/` content kit: `README.md`, `00-FACTS.md` (verified-facts intake + publish gate), `01-copy.md` (MLS-safe description, IG/FB/LinkedIn/short-form/Pinterest, Canva overlays), `02-posting-schedule.md`, `03-syndication-compliance-checklist.md`, `04-tooling-and-automation.md`, `05-prompt.md`, and `automation/` (disabled n8n scaffold + Make notes).
+- Disclosure pulled from `src/lib/compliance.ts` (owner-confirmed 2026-06-20); REALTOR® mark intentionally not used; license # left open.
+- No website route, dependency, deploy, DNS, Cloudflare, Vercel, or credential changes. Automation scaffold is `active: false` with a manual-approval gate and placeholder credentials only.
+
+### Verification
+
+- Content-only change; no build/runtime surface touched. Validated JSON parses for the n8n scaffold (`python3 -c json.load`). No app lint/build/test run because no app code changed (label: app checks not applicable to this content-only change).
+
+### Remaining / open
+
+- Publishing is gated on `00-FACTS.md`: verified listing facts, license number + exact § 174-1-17 byline, social handle(s), scheduling/contact URL, EHO decision. Tracked in `TASKS.md`.
+
 ## 2026-06-20 - Claude (compliance disclosure surfaces)
 
 ### Objective

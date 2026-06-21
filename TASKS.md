@@ -1,6 +1,12 @@
 # Malickland 2.0 Tasks
 
-Last updated: 2026-06-19
+Last updated: 2026-06-21
+
+## Marketing / Campaigns
+
+- [x] Build Advent Dr social campaign kit (content-only) - acceptance: standalone `campaign/advent-dr/` with copy, posting schedule, syndication/compliance checklist, tooling/automation guide, reusable prompt, and a disabled automation scaffold; verified-facts-only with disclosure from `src/lib/compliance.ts`; no production website/route/deploy changes; current listing only (not closed `37 Advent Dr`) - verification: files added under `campaign/advent-dr/`; n8n scaffold JSON parses; no app code touched (app build/lint/test not applicable) - date/agent: 2026-06-21/Claude.
+- [ ] Fill Advent Dr publish gate before going public - acceptance: `campaign/advent-dr/00-FACTS.md` completed with verified listing facts (address/price/type/acreage/MLS/status/URL/features), brokerage/agent license number + exact § 174-1-17 byline, official social handle(s), confirmed scheduling/contact URL, and EHO decision; all copy `[BRACKETS]` resolved; REALTOR® mark not used - dependencies: owner-provided listing facts + license/handle/URL confirmations - status: open.
+- [ ] (Optional, build-later) Stand up listing social automation - acceptance: only after campaign language/compliance are stable and the process is repeatable; implement `campaign/advent-dr/automation/` scaffold with real credentials, manual-approval gate, and failure handling on self-hosted n8n (or Make with a credit budget) - dependencies: stable campaign + owner go-ahead - status: deferred (not Day 1).
 
 ## Critical
 

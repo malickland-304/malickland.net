@@ -1,0 +1,116 @@
+{
+  "name": "Advent Dr / Listing Social Pipeline (BUILD-LATER SCAFFOLD — DO NOT IMPORT FOR DAY 1)",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "description": "Disabled scaffold for a repeatable listing social pipeline. Manual-approval gate before any post. Self-host n8n Community Edition (free); n8n Cloud is paid. Fill in credentials and confirm compliance BEFORE enabling. Not a Day-1 step."
+  },
+  "nodes": [
+    {
+      "id": "trigger-manual",
+      "name": "Manual Trigger (start by hand)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "parameters": {}
+    },
+    {
+      "id": "read-facts",
+      "name": "Read verified facts (Google Sheet)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [520, 300],
+      "parameters": {
+        "operation": "read",
+        "documentId": "REPLACE_WITH_SHEET_ID",
+        "sheetName": "listings",
+        "options": {}
+      },
+      "notes": "Sheet columns must mirror 00-FACTS.md. Only rows marked verified=Y proceed."
+    },
+    {
+      "id": "guard-verified",
+      "name": "IF facts verified AND status=Active",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [800, 300],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "combinator": "and",
+          "conditions": [
+            { "leftValue": "={{ $json.verified }}", "rightValue": "Y", "operator": { "type": "string", "operation": "equals" } },
+            { "leftValue": "={{ $json.status }}", "rightValue": "Active", "operator": { "type": "string", "operation": "equals" } }
+          ]
+        }
+      },
+      "notes": "Blocks unverified facts and non-active listings from ever posting."
+    },
+    {
+      "id": "approval-gate",
+      "name": "MANUAL APPROVAL before posting",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1080, 240],
+      "parameters": {
+        "resume": "webhook",
+        "options": {}
+      },
+      "notes": "Human must approve via the resume webhook. No unattended publishing of real estate copy."
+    },
+    {
+      "id": "post-meta",
+      "name": "Post to FB/IG (Meta Graph API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1360, 240],
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/REPLACE_PAGE_OR_IG_ID/feed",
+        "authentication": "genericCredentialType",
+        "sendBody": true,
+        "options": {}
+      },
+      "notes": "Requires Meta app, page/IG access token, app review for content publishing. Handle token expiry + rate limits + partial failures. Disclosure must already be in the copy/graphic."
+    },
+    {
+      "id": "queue-buffer",
+      "name": "Queue LinkedIn/X via Buffer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1360, 360],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.bufferapp.com/1/updates/create.json",
+        "authentication": "genericCredentialType",
+        "sendBody": true,
+        "options": {}
+      },
+      "notes": "Buffer free plan: 3 channels, 10 scheduled posts/channel. Confirm current limits."
+    },
+    {
+      "id": "log",
+      "name": "Log attempt (Sheet/append)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1640, 300],
+      "parameters": {
+        "operation": "append",
+        "documentId": "REPLACE_WITH_SHEET_ID",
+        "sheetName": "post_log",
+        "options": {}
+      },
+      "notes": "Record every post attempt + result for audit."
+    }
+  ],
+  "connections": {
+    "Manual Trigger (start by hand)": { "main": [[{ "node": "Read verified facts (Google Sheet)", "type": "main", "index": 0 }]] },
+    "Read verified facts (Google Sheet)": { "main": [[{ "node": "IF facts verified AND status=Active", "type": "main", "index": 0 }]] },
+    "IF facts verified AND status=Active": { "main": [[{ "node": "MANUAL APPROVAL before posting", "type": "main", "index": 0 }], []] },
+    "MANUAL APPROVAL before posting": { "main": [[{ "node": "Post to FB/IG (Meta Graph API)", "type": "main", "index": 0 }, { "node": "Queue LinkedIn/X via Buffer", "type": "main", "index": 0 }]] },
+    "Post to FB/IG (Meta Graph API)": { "main": [[{ "node": "Log attempt (Sheet/append)", "type": "main", "index": 0 }]] },
+    "Queue LinkedIn/X via Buffer": { "main": [[{ "node": "Log attempt (Sheet/append)", "type": "main", "index": 0 }]] }
+  }
+}

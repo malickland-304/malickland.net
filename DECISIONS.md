@@ -1,5 +1,23 @@
 # Malickland 2.0 Decisions
 
+## 2026-06-21 - Add Advent Dr Social Campaign Kit As Standalone Content (Not Production Website Work)
+
+Problem: The owner requested a social media campaign for the current Advent Dr listing in Romney, WV, and authorized committing the kit to this `malickland.net` repo. Two governance tensions existed: (1) `.cursor/rules/not-wv-property-production.mdc` says to stop before committing if a request involves `/37-advent` or current production website work; (2) the original "zero-budget" brief overstated free tiers and assumed a free public-listing syndication lane.
+
+Decision: Add a standalone, content-only campaign kit under `campaign/advent-dr/` (copy, posting schedule, syndication/compliance checklist, tooling/automation guide, reusable prompt, and a disabled build-later n8n/Make automation scaffold). Explicitly scope it to the **current** Advent Dr listing, which is **not** the closed `37 Advent Dr` production listing the cursor rule protects. Do not edit, deploy, or infer any website route (`/listings`, `/37-advent`, `/wv/*-county`), DNS, Cloudflare, Vercel, or production data. Pull the brokerage disclosure from the existing single source of truth `src/lib/compliance.ts` (owner-confirmed 2026-06-20) rather than re-stating it; keep verified-facts-only copy with bracketed fields for all unconfirmed facts.
+
+Reasoning: Authority precedence rule #1 (explicit human owner instruction) authorizes committing the kit here. The cursor rule's intent — don't do production website work and don't infer production state from this prototype — is preserved because this change is marketing content only and touches no production surface. The closed `37 Advent Dr` listing is deliberately excluded. Compliance constraints (rule #2) are honored via Fair-Housing-safe language, required disclosure, no invented price/acreage/utilities/returns/urgency, and a manual-approval gate in the automation scaffold.
+
+Alternatives considered: (1) commit to `openclaw-system` instead — rejected, owner chose `malickland.net`; (2) chat-only, no commit — rejected, owner wanted versioned artifacts; (3) treat as production listing work and stop — rejected, this is a different (current) listing and content-only, with explicit owner authorization.
+
+Corrections applied to the original brief: free-tier limits stated accurately (Buffer 3 channels / 10 posts per channel; Later 14-day trial then paid; n8n Cloud paid vs self-hosted Community free; Make 1,000 credits/month consumed per action); removed the "free syndication to all portals" assumption (MLS feed drives major portals if MLS-backed, otherwise each portal is a separate manual compliance check); automation kept out of Day 1.
+
+Security/performance impact: None to the running app — no code, route, dependency, deploy, or credential changes. The automation scaffold is `active: false` with a manual-approval gate and placeholder credentials only; no secrets committed.
+
+Files affected: `campaign/advent-dr/**`, `DECISIONS.md`, `TASKS.md`, `PROJECT_STATE.md`, `WORK_LOG.md`.
+
+Open owner confirmations (gate publishing): verified listing facts for the current Advent Dr property; brokerage/agent license number and exact WV § 174-1-17 byline wording; official social handle(s); scheduling/contact URL; whether to add "Equal Housing Opportunity" to housing ads. REALTOR® mark must not be used.
+
 ## 2026-06-19 - Re-target Compliance Roadmap Onto Existing Next.js Stack
 
 Problem: The compliance implementation roadmap was drafted against a Squarespace build with a Resend email pipeline, Squarespace Saved Sections/Site Styles, and a forest-green palette. The shipped repository is a Next.js 16 / React 19 app with a Gmail/Nodemailer `/api/contact` pipeline, Tailwind v4, a forest green/gold palette, and a Cloudflare Worker listing subsystem. `AGENTS.md` and `ARCHITECTURE.md` forbid replacing this topology without documented failure evidence, migration impact, and rollback.
