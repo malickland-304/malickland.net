@@ -1,6 +1,6 @@
 # Malickland 2.0 Tasks
 
-Last updated: 2026-06-19
+Last updated: 2026-06-21
 
 ## Critical
 
@@ -9,8 +9,8 @@ Last updated: 2026-06-19
 - [x] Implement compliance disclosure surfaces - acceptance: global footer disclosure (licensed office + address + phone) on every page; § 174-1-17 half-size firm/broker lockup, byline, and ≤2-click social disclosure path on any page naming Phil; owner/legal confirm wording - verification: `src/lib/compliance.ts` single source of truth; `LicensedOfficeDisclosure` + `FirmBrokerLockup` in `src/components/compliance.tsx`; footer renders the disclosure globally via the layout (covers every Phil-named page) with social icons beside it (≤2-click); `npm run lint` 0 errors, `npm run build` (incl. TypeScript) pass, `npm run test:contact` 15/15 - date/agent: 2026-06-20/Claude. Note: exact § 174-1-17 statutory wording owner/legal-confirmable; live ≤2-click path to re-verify post-deploy (`LAUNCH_CHECKLIST.md` §C).
 - [x] Remove production dependency audit blockers - acceptance: `npm audit --omit=dev` reports 0 production vulnerabilities or remaining advisories are documented with mitigation - verification: `npm audit --omit=dev --json` reported 0 vulnerabilities after narrow package updates, `nodemailer@^9.0.1`, and a `postcss` override - date/agent: 2026-06-19/Codex.
 - [x] Harden `/api/contact` input handling - acceptance: validates types, trims fields, enforces length limits, validates email shape, requires Gmail env vars before sending, avoids sensitive logs, and has targeted tests or documented manual verification - verification: `npm run test:contact`, scoped ESLint, `tsc --noEmit`, `npm audit --omit=dev`, and `npm run build` passed in `/tmp/malickland-contact-validate-20260602`; main checkout lint/type-check still hang and are not counted as passing - date/agent: 2026-06-02/Codex.
-- [ ] Resolve listings route ownership - acceptance: `ARCHITECTURE.md` and `DECISIONS.md` state whether Next.js or Cloudflare Worker owns `/listings`, and deployment routes match the decision - dependencies: production routing evidence - status: open.
-- [ ] Complete production cutover and live lead verification - acceptance: Vercel production URL is healthy before DNS changes; Cloudflare no longer points apex/`www` at the old VPS `31.97.58.203`; live `malickland.net` serves the Next.js routes (`/contact`, `/services`, `/services/property-intelligence-report`, `/api/contact`); Vercel production env vars for Gmail and rate limiting are verified; one real test lead arrives in the destination inbox with attribution/service/timeline populated - dependencies: owner Cloudflare/Vercel access, listings route ownership, production env verification - status: open; see `LAUNCH_CHECKLIST.md` §F.
+- [ ] Resolve listings route ownership - acceptance: `ARCHITECTURE.md` and `DECISIONS.md` state whether Next.js or Cloudflare Worker owns `/listings`, and deployment routes match the decision - dependencies: production routing evidence - status: open; gates Cloudflare/Vercel DNS cutover per `LAUNCH_CHECKLIST.md` section F.
+- [ ] Complete owner-side production cutover gate - acceptance: `LAUNCH_CHECKLIST.md` section F is checked with actual evidence from the Vercel deployment URL, Vercel production env, Cloudflare DNS/routing, live-domain lead delivery, and live-domain app identity checks - dependencies: owner Vercel login, owner Cloudflare DNS change, resolved `/listings` ownership - status: open; owner-run production task, not agent-run.
 
 ## High Priority
 
