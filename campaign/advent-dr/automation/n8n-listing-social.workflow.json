@@ -23,6 +23,7 @@
       "typeVersion": 4,
       "position": [520, 300],
       "parameters": {
+        "authentication": "oAuth2",
         "operation": "read",
         "documentId": "REPLACE_WITH_SHEET_ID",
         "sheetName": "listings",
@@ -70,7 +71,10 @@
         "method": "POST",
         "url": "https://graph.facebook.com/v21.0/REPLACE_PAGE_OR_IG_ID/feed",
         "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"message\": \"{{ $json.message }}\" }",
         "options": {}
       },
       "notes": "Requires Meta app, page/IG access token, app review for content publishing. Handle token expiry + rate limits + partial failures. Disclosure must already be in the copy/graphic."
@@ -85,7 +89,10 @@
         "method": "POST",
         "url": "https://api.bufferapp.com/1/updates/create.json",
         "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"text\": \"{{ $json.message }}\", \"profile_ids\": [\"REPLACE_WITH_PROFILE_ID\"] }",
         "options": {}
       },
       "notes": "Buffer free plan: 3 channels, 10 scheduled posts/channel. Confirm current limits."
@@ -97,6 +104,7 @@
       "typeVersion": 4,
       "position": [1640, 300],
       "parameters": {
+        "authentication": "oAuth2",
         "operation": "append",
         "documentId": "REPLACE_WITH_SHEET_ID",
         "sheetName": "post_log",

@@ -8,7 +8,8 @@ disability, etc.; no "safe," "perfect for families," "great schools," "exclusive
 neighborhood").
 
 Brand voice: professional, local, factual, direct. Brand colors for graphics —
-Navy `#1e3a5f`, Gold `#c8961e`.
+Forest Green `#1C3A1C`, Gold `#C4A040` (the implemented site palette; the navy
+tokens still in `globals.css`/README are stale per `DECISIONS.md`).
 
 ---
 
@@ -150,8 +151,8 @@ Romney. `[FEATURE_1]`; `[FEATURE_2]`. Offered at `[PRICE]`. Contact Phil Malick,
 ## 7. Canva text overlays (4 graphics)
 
 Sizes: IG square 1080×1080, IG/FB story 1080×1920, FB link/banner as needed.
-Put the disclosure line small but legible on each graphic. Colors: Navy
-`#1e3a5f` background, Gold `#c8961e` accents.
+Put the disclosure line small but legible on each graphic. Colors: Forest Green
+`#1C3A1C` background, Gold `#C4A040` accents.
 
 **A — Just Listed**
 - Eyebrow: `JUST LISTED`

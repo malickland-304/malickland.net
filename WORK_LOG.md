@@ -22,6 +22,11 @@ Build a compliance-first social media campaign kit for the current Advent Dr lis
 
 - Content-only change; no build/runtime surface touched. Validated JSON parses for the n8n scaffold (`python3 -c json.load`). No app lint/build/test run because no app code changed (label: app checks not applicable to this content-only change).
 
+### Review responses (PR #13)
+
+- gemini-code-assist flagged stale brand colors: kit used navy `#1e3a5f`/`#c8961e` (from the stale README/`globals.css` tokens) instead of the implemented Forest Green `#1C3A1C` / Gold `#C4A040` palette (`DECISIONS.md` 2026-06-19). Verified via `grep` of `src/**` (forest green/gold hardcoded across all pages/components) and corrected `01-copy.md` brand + Canva colors.
+- gemini-code-assist flagged n8n scaffold node config: added `authentication: oAuth2` to both Google Sheets nodes and `genericAuthType: httpHeaderAuth` + `specifyBody/jsonBody` placeholders to the Meta and Buffer HTTP nodes. Scaffold remains `active: false` with `REPLACE_*` placeholders (not runnable as-is). JSON re-validated.
+
 ### Remaining / open
 
 - Publishing is gated on `00-FACTS.md`: verified listing facts, license number + exact § 174-1-17 byline, social handle(s), scheduling/contact URL, EHO decision. Tracked in `TASKS.md`.
