@@ -1,6 +1,6 @@
 # MalickLand Launch Checklist
 
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 **Purpose:** the single pre-go-live gate. This ties the **lead-safety gate** and the
 **compliance gate** from `COMPLIANCE_ROADMAP.md` into one pass/fail list. A page or the site does
@@ -59,9 +59,34 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 - [ ] DNS/SSL topology verified (Squarespace DNS → Cloudflare → host); no deploy/DNS/Cloudflare
       change made without explicit owner sign-off (`AGENTS.md`).
 
+## F. Owner-side production cutover gate (Cloudflare/Vercel)
+
+As of 2026-06-20, GitHub/Vercel showed the merged `main` deployment as green, but public
+`malickland.net` traffic still resolved through Cloudflare to the older VPS app at `31.97.58.203`.
+Do not treat the site as launched until this gate passes.
+
+- [ ] Verify the Vercel production deployment URL itself is healthy before touching DNS:
+      `/`, `/contact`, `/services`, `/services/property-intelligence-report`, and `/api/contact`
+      must resolve on the `*.vercel.app` deployment. If they return Vercel `404`, stop and fix the
+      deployment/app configuration before changing DNS.
+- [ ] Resolve `TASKS.md` "Resolve listings route ownership" before cutover, including whether
+      `/listings` is owned by the Next.js app or the Cloudflare Worker/listing subsystem.
+- [ ] Confirm Vercel production environment variables are present and correct:
+      `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and, if durable rate limiting is required,
+      `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`.
+- [ ] Owner updates Cloudflare DNS deliberately: remove the old VPS pinning to `31.97.58.203`,
+      point apex/`www` at the intended Vercel records, and choose proxied vs DNS-only plus SSL mode
+      intentionally.
+- [ ] After DNS cutover, verify the live apex no longer serves the old Express app:
+      `/contact` should render the Next.js contact route, `/api/contact` should be the active route,
+      and `/api/health` + `/api/config` should not identify the old VPS app.
+- [ ] Submit one real test lead through live `https://malickland.net/contact` and confirm it arrives
+      at the destination inbox with attribution, service interest, and timeline populated. A `200`
+      response alone is not sufficient.
+
 ## Sign-off
 
-- [ ] Sections B–E pass for all shipping pages.
+- [ ] Sections B–F pass for all shipping pages.
 - [ ] Section A resolved for any Phil-named page being published.
 - [ ] Result recorded in `WORK_LOG.md` with the actual commands/checks run.
 
