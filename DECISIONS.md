@@ -1,5 +1,19 @@
 # Malickland 2.0 Decisions
 
+## 2026-06-22 - Defer Public Listings For Launch (Next.js Owns `/listings` As A Placeholder)
+
+Problem: `/listings` (`src/app/listings/page.tsx`, Next.js) fetched live inventory from `https://malickland.net/api/listings`, an endpoint owned by the Cloudflare Worker listing subsystem (`listing-system/`). That Worker is not deployed (its `wrangler.toml` still has placeholder `account_id`/KV `id`), and `/api/listings` does not exist in the Next.js app. On fetch failure the page rendered three hardcoded sample properties (`FALLBACK_LISTINGS`), and `/listings` was linked from the primary nav, the homepage hero CTA, and the footer. Publishing fabricated inventory on a licensed agent's site is a compliance/integrity risk and blocked the production cutover (`LAUNCH_CHECKLIST.md` §F; `TASKS.md` "Resolve listings route ownership").
+
+Decision (owner-selected 2026-06-22): Defer public listings for launch. The Next.js app owns `/listings` as a static, honest "inventory coming soon / contact" placeholder — no fetch, no fabricated data, `robots: { index: false }` — with contact details sourced from `src/lib/compliance.ts`. The `/listings` links were removed from `src/components/nav.tsx`, the homepage hero (`src/app/page.tsx`; primary CTA repointed to `/services`), and `src/components/footer.tsx`. The Cloudflare Worker listing subsystem (`listing-system/`) remains in the repo but is NOT deployed or wired for launch. Whether real listings are later served Next.js-natively (a Vercel `/api/listings` + data source) or via the Worker is a separate post-launch decision.
+
+Reasoning: Removes fabricated-inventory exposure, unblocks the cutover, and avoids standing up unverified Cloudflare Worker/KV infrastructure under launch pressure. Honors the `AGENTS.md` stability rules (no new deployment topology without evidence + rollback) by deferring rather than deploying the Worker.
+
+Alternatives considered: (1) Build a Next.js-native `/api/listings` + real data now — more pre-launch work; deferred. (2) Deploy and wire the Cloudflare Worker now (real account, KV namespace, real data, coexistence routing with Vercel) — most moving parts under launch pressure; deferred. (3) Keep the fake fallback — rejected (compliance/integrity).
+
+Security/performance impact: Eliminates an outbound build/runtime fetch to an undeployed endpoint and removes misleading content. No secrets, no new dependencies, no infrastructure changes.
+
+Files affected: `src/app/listings/page.tsx`, `src/components/nav.tsx`, `src/components/footer.tsx`, `src/app/page.tsx`, `ARCHITECTURE.md`, `TASKS.md`, `LAUNCH_CHECKLIST.md`, `WORK_LOG.md`, `DECISIONS.md`.
+
 ## 2026-06-19 - Re-target Compliance Roadmap Onto Existing Next.js Stack
 
 Problem: The compliance implementation roadmap was drafted against a Squarespace build with a Resend email pipeline, Squarespace Saved Sections/Site Styles, and a forest-green palette. The shipped repository is a Next.js 16 / React 19 app with a Gmail/Nodemailer `/api/contact` pipeline, Tailwind v4, a forest green/gold palette, and a Cloudflare Worker listing subsystem. `AGENTS.md` and `ARCHITECTURE.md` forbid replacing this topology without documented failure evidence, migration impact, and rollback.

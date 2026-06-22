@@ -1,6 +1,6 @@
 # Malickland 2.0 Architecture
 
-Last updated: 2026-06-19
+Last updated: 2026-06-22
 
 ## Current System
 
@@ -15,7 +15,7 @@ Malickland 2.0 is currently a public real-estate marketing website plus an untra
   - `/`: public homepage.
   - `/services`: public service-offer index.
   - `/services/[slug]`: public service-offer detail pages for deal facilitation and MEDjAi report/checkup offers.
-  - `/listings`: server-rendered listings page that fetches listing data.
+  - `/listings`: static "inventory coming soon / contact" placeholder (`noindex`), owned by the Next.js app. Listings are deferred for launch — no data fetch and no fabricated fallback (see `DECISIONS.md` 2026-06-22); unlinked from nav/hero/footer.
   - `/about`: public bio and service-area page.
   - `/contact`: client contact form.
   - `/api/contact`: Next.js route handler that sends contact inquiries through Gmail via Nodemailer.
@@ -36,11 +36,11 @@ The `listing-system/` directory is currently untracked by git as of this audit. 
 1. Listing manager submits listing data and images to `POST /api/save` with Bearer token auth.
 2. Cloudflare Worker stores listing records in KV and updates the `__index` key.
 3. Worker optionally forwards lead data to a Google Apps Script webhook.
-4. Next.js `/listings` fetches JSON from `LISTINGS_API_URL` or `https://malickland.net/api/listings` with 60-second revalidation.
+4. (Deferred for launch) The live listing data flow above is not wired: `/listings` is a static placeholder that performs no fetch, and the Cloudflare Worker is not deployed. When listings are reintroduced, this flow (or a Next.js-native `/api/listings`) will be revisited per `DECISIONS.md` (2026-06-22).
 5. Vercel Analytics collects page analytics from the global App Router layout when the app is deployed on a supported Vercel runtime. GA4 is not currently installed and remains a separate future decision.
 
 ## Architectural Stability
 
 - Do not merge `wv-property-intelligence` assumptions into this repo without fresh evidence. This repo is `malickland.net`, not the older Express/SQLite app.
 - Do not replace the current Next.js + Worker + Apps Script topology without documenting failure evidence, migration impact, rollback plan, and affected files in `DECISIONS.md`.
-- Do not deploy Worker route changes until routing ownership between Next.js `/listings` and Worker `/listings` is explicitly resolved.
+- Routing ownership for `/listings` is resolved for launch: the Next.js app owns it as a static placeholder and the Cloudflare Worker is not deployed (`DECISIONS.md` 2026-06-22). Do not deploy Worker `/listings` / `/api/*` routes — or otherwise reintroduce live listings — without a new `DECISIONS.md` entry covering routing ownership, security hardening, and rollback.

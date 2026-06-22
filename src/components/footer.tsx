@@ -51,7 +51,6 @@ export function Footer() {
               {[
                 { href: "/", label: "Home" },
                 { href: "/services", label: "Services" },
-                { href: "/listings", label: "View Listings" },
                 { href: "/about", label: "About Phil" },
                 { href: "/contact", label: "Contact" },
               ].map((l) => (

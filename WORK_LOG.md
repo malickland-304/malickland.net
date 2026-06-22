@@ -1,5 +1,41 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-22 - Claude (defer public listings for launch)
+
+### Objective
+
+Resolve the `/listings` route-ownership blocker for the production cutover (`LAUNCH_CHECKLIST.md` §F; `TASKS.md`) by deferring public listings per owner decision 2026-06-22, removing the fabricated-inventory exposure that would otherwise ship when DNS cuts over to Vercel.
+
+### Context / problem
+
+`src/app/listings/page.tsx` fetched `https://malickland.net/api/listings` (owned by the undeployed Cloudflare Worker `listing-system/`; placeholder `wrangler.toml` account/KV IDs) and, on failure, rendered three hardcoded sample properties (`FALLBACK_LISTINGS`). `/api/listings` does not exist in the Next.js app, so post-cutover the page would have shown fabricated homes. `/listings` was linked from nav, the homepage hero, and the footer.
+
+### Changes made
+
+- `src/app/listings/page.tsx`: replaced the fetch + `FALLBACK_LISTINGS` + fake search UI with a static, honest "inventory coming soon / contact" placeholder; `robots: { index: false, follow: true }`; contact details sourced from `src/lib/compliance.ts`. No data fetch, no fabricated listings.
+- `src/components/nav.tsx`, `src/components/footer.tsx`: removed the `/listings` links.
+- `src/app/page.tsx`: hero primary CTA repointed from `/listings` ("View Listings") to `/services` ("Explore Services").
+- `DECISIONS.md`: added "2026-06-22 - Defer Public Listings For Launch".
+- `ARCHITECTURE.md`: `/listings` documented as a static placeholder owned by Next.js; live listing data flow marked deferred; routing-ownership stability note updated.
+- `TASKS.md`: "Resolve listings route ownership" marked done; "Add first automated tests" note updated (the fetch/fallback path was removed).
+- `LAUNCH_CHECKLIST.md` §F: listings-ownership item checked; recorded the separate, unresolved Vercel-serving finding under the first §F item.
+
+### Verification (commands actually run; fresh clone of `main` @ 86ad42f, branch `fix/defer-listings-launch`)
+
+- `npm ci` → 0 vulnerabilities (exit 0).
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` → ✓ compiled; all routes emitted; `/listings` now static with no revalidating fetch (exit 0).
+- `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs` → 0 problems (exit 0).
+- `./node_modules/.bin/tsc --noEmit` → clean (exit 0).
+- `npm run test:contact` → 15/15 pass (exit 0).
+- `npm audit --omit=dev` → 0 vulnerabilities (exit 0).
+- `grep -rn "/listings" src` → no references remain in `src/`.
+
+### Remaining risks / not done here
+
+- **Vercel serving (P0, owner-run):** the production deployment currently returns Vercel platform `404` on `/` and every route (build green; Vercel project `framework: null`), most likely a Framework-Preset misconfig. This change does NOT fix it, and the PR's own Vercel preview will also `404` until the project setting is corrected. Tracked in `LAUNCH_CHECKLIST.md` §F and above.
+- Vercel production env (`GMAIL_USER`/`GMAIL_APP_PASSWORD`), deployment-protection scope, the Cloudflare DNS flip, and the live lead test remain owner-run §F items.
+- The Cloudflare Worker `listing-system/` remains in-repo but undeployed; reintroducing live listings requires a new `DECISIONS.md` entry.
+
 ## 2026-06-21 - Codex Owner-Side Cutover Runbook
 
 ### Objective

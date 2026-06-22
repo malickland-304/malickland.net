@@ -73,8 +73,18 @@ Do not treat the site as launched until this gate passes.
       `/`, `/contact`, `/services`, `/services/property-intelligence-report`, and `/api/contact`
       must resolve on the `*.vercel.app` deployment. If they return Vercel `404`, stop and fix the
       deployment/app configuration before changing DNS.
-- [ ] Resolve `TASKS.md` "Resolve listings route ownership" before cutover, including whether
+      *(2026-06-22 finding — UNRESOLVED, blocks cutover: the production deployment serves Vercel
+      platform `404`/`NOT_FOUND` on `/` and every route, even though the build is green and
+      `next build` emits all routes. The Vercel project reports `framework: null`; most likely the
+      Framework Preset is not set to Next.js, so the compiled output is not served. Owner fix: set
+      Framework Preset = Next.js (verify Root Directory = `./`, default build/output command),
+      redeploy, then re-run this check. See `WORK_LOG.md` 2026-06-22.)*
+- [x] Resolve `TASKS.md` "Resolve listings route ownership" before cutover, including whether
       `/listings` is owned by the Next.js app or the Cloudflare Worker/listing subsystem.
+      *(2026-06-22: owner deferred listings. The Next.js app owns `/listings` as a static `noindex`
+      "coming soon / contact" placeholder — no fetch, no fabricated fallback — and the links were
+      removed from nav/hero/footer. The Cloudflare Worker listing subsystem is not deployed. See
+      `DECISIONS.md` 2026-06-22.)*
 - [ ] Confirm Vercel production environment variables are present and correct:
       `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and, if durable rate limiting is required,
       `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`.
