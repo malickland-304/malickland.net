@@ -73,8 +73,10 @@ Do not treat the site as launched until this gate passes.
       `/`, `/contact`, `/services`, `/services/property-intelligence-report`, and `/api/contact`
       must resolve on the `*.vercel.app` deployment. If they return Vercel `404`, stop and fix the
       deployment/app configuration before changing DNS.
-- [ ] Resolve `TASKS.md` "Resolve listings route ownership" before cutover, including whether
-      `/listings` is owned by the Next.js app or the Cloudflare Worker/listing subsystem.
+- [x] Resolve `TASKS.md` "Resolve listings route ownership" before cutover. Launch decision:
+      `/listings` is owned by the Next.js app as a property-search request page; public listing
+      inventory and the Cloudflare Worker/listing subsystem are deferred until the data source,
+      route ownership, and review process are verified.
 - [ ] Confirm Vercel production environment variables are present and correct:
       `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and, if durable rate limiting is required,
       `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`.

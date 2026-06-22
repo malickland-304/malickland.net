@@ -1,5 +1,19 @@
 # Malickland 2.0 Decisions
 
+## 2026-06-22 - Defer Public Listings Feed For Launch
+
+Problem: `/listings` fetched `LISTINGS_API_URL` or `https://malickland.net/api/listings`, but the cutover target does not currently own a verified production listings API. The page also had hardcoded fallback properties, which could expose sample inventory as if it were active real estate listings.
+
+Decision: Defer the public listings feed for launch. Keep `/listings` as an honest property-search request page, remove it from the primary nav, homepage hero CTA, and footer quick links, and do not render fallback/sample properties. The Cloudflare Worker/listing-management subsystem remains future work and must not be routed in front of production until account, KV, data ownership, security, and review steps are verified.
+
+Reasoning: A clean launch with no fabricated inventory is safer than adding a second production data system under time pressure. Buyers and sellers still have a lead path through `/contact?service=Listings%20%2F%20Showings`.
+
+Alternatives considered: (1) ship sample fallback listings — rejected as a compliance/data-integrity risk; (2) deploy the existing Cloudflare Worker now — rejected for launch because it adds Cloudflare account/KV/routing/data-review work; (3) build a Next.js listings API before launch — deferred until the public site is live.
+
+Security/performance impact: Removes an unauthenticated external fetch from the launch path and avoids publishing unverified property data. No production secrets, DNS, or Vercel settings are changed.
+
+Files affected: `src/app/listings/page.tsx`, `src/components/nav.tsx`, `src/components/footer.tsx`, `src/app/page.tsx`, `ARCHITECTURE.md`, `TASKS.md`, `LAUNCH_CHECKLIST.md`, `WORK_LOG.md`.
+
 ## 2026-06-19 - Re-target Compliance Roadmap Onto Existing Next.js Stack
 
 Problem: The compliance implementation roadmap was drafted against a Squarespace build with a Resend email pipeline, Squarespace Saved Sections/Site Styles, and a forest-green palette. The shipped repository is a Next.js 16 / React 19 app with a Gmail/Nodemailer `/api/contact` pipeline, Tailwind v4, a forest green/gold palette, and a Cloudflare Worker listing subsystem. `AGENTS.md` and `ARCHITECTURE.md` forbid replacing this topology without documented failure evidence, migration impact, and rollback.
@@ -32,7 +46,7 @@ Files affected: `AGENTS.md`, `ARCHITECTURE.md`, `PROJECT_STATE.md`, `TASKS.md`, 
 
 ## 2026-05-27 - Preserve Current Next.js Plus Listing Worker Architecture Pending Evidence
 
-Problem: The repo contains a Next.js marketing app and an untracked Cloudflare Worker listing subsystem, while prior Malickland work also involved a separate `wv-property-intelligence` Express/SQLite app.
+Problem: The repo contains a Next.js marketing app and a Cloudflare Worker listing subsystem, while prior Malickland work also involved a separate `wv-property-intelligence` Express/SQLite app.
 
 Decision: Treat this checkout as the `malickland.net` Next.js 16/React 19 app with a candidate Worker/Apps Script listing subsystem. Do not import assumptions from `wv-property-intelligence` without fresh evidence.
 

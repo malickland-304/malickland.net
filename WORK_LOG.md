@@ -1,5 +1,34 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-22 - Codex Defer Public Listings For Launch
+
+### Objective
+
+Remove the listings-feed cutover blocker without shipping fabricated or unverified property inventory.
+
+### Changes Made
+
+- Replaced `/listings` with a launch-safe property-search request page.
+- Removed the external listings API fetch and hardcoded fallback/sample properties.
+- Removed Listings from the primary nav and footer quick links.
+- Changed the homepage hero CTA from "View Listings" to a service-tagged contact path.
+- Recorded the launch decision in `DECISIONS.md`, `ARCHITECTURE.md`, `TASKS.md`, and `LAUNCH_CHECKLIST.md`.
+
+### Verification
+
+- `npm audit --omit=dev --cache /Users/yhyh7/Documents/.npm-cache` -> 0 vulnerabilities.
+- `npm run test:contact` -> 15/15 pass.
+- `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs` -> pass.
+- `./node_modules/.bin/tsc --noEmit` -> pass.
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` -> pass; `/listings` generated as a static page.
+- Text scan found no remaining old sample property names or promoted `/listings` links in `src`.
+
+### Remaining Risks
+
+- Vercel project settings/protection and production environment variables remain owner-side blockers.
+- Cloudflare DNS cutover and the inbox-confirmed live lead test remain owner-side launch steps.
+- Real public listings remain deferred until the listing data source, route ownership, and review process are verified.
+
 ## 2026-06-21 - Codex Owner-Side Cutover Runbook
 
 ### Objective
