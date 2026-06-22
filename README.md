@@ -66,7 +66,6 @@ Copy `.env.example` to `.env.local` for local development and fill in only the v
 | `CONTACT_RATE_LIMIT_REDIS_REST_URL` | Production contact form | Redis REST endpoint for durable cross-instance `/api/contact` rate limiting. |
 | `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN` | Production contact form | Bearer token for the Redis REST endpoint. Keep secret. |
 | `CONTACT_RATE_LIMIT_REDIS_TIMEOUT_MS` | Optional | Redis REST limiter timeout in milliseconds. Defaults to `1500`. |
-| `LISTINGS_API_URL` | Optional | Overrides the default listings API URL used by `/listings`. |
 
 Never commit real secrets or production credentials.
 
@@ -77,6 +76,10 @@ so limits are shared across serverless instances and restarts. If only one Redis
 REST value is configured, or if Redis does not answer before the configured
 timeout, the contact route fails closed with a temporary unavailable response
 instead of silently running without the durable limiter.
+
+The launch `/listings` page is a property-search request page and does not
+consume a listings API. Public listing inventory is deferred until the production
+data source, route ownership, and review process are verified.
 
 ## Related Repo
 

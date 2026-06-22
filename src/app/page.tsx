@@ -131,10 +131,10 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
-                href="/listings"
+                href="/contact?service=Listings%20%2F%20Showings"
                 className="bg-[#C4A040] hover:bg-[#D4B050] text-white px-8 py-3.5 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2"
               >
-                View Listings <ArrowRight className="w-4 h-4" />
+                Request Property Help <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/contact"
