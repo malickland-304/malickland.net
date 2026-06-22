@@ -1,6 +1,6 @@
 # MalickLand Launch Checklist
 
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 **Purpose:** the single pre-go-live gate. This ties the **lead-safety gate** and the
 **compliance gate** from `COMPLIANCE_ROADMAP.md` into one pass/fail list. A page or the site does
@@ -16,7 +16,7 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 - [x] **Licensed office confirmed** — MalickLand — WV Real Estate Agency, 501 East Main Street, Romney, WV 26757, (540) 246-1421 (owner-confirmed 2026-06-20). Recorded in `src/lib/compliance.ts`. Exact statutory byline/broker-of-record wording remains owner/legal-confirmable.
 
 > Until all three are checked, pages that name Phil stay unpublished. Non-Phil pages may ship if
-> they pass sections B–E.
+> they pass sections B–F.
 
 ## B. Lead-safety gate (per form, before that form goes live)
 
@@ -60,6 +60,10 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
       change made without explicit owner sign-off (`AGENTS.md`).
 
 ## F. Owner-side production cutover gate (Cloudflare/Vercel)
+
+> These are owner-run checks. Agents may prepare documentation and repo-side fixes, but must not
+> perform Cloudflare DNS/routing, Vercel device-login, or secret-bearing production environment
+> changes.
 
 As of 2026-06-20, GitHub/Vercel showed the merged `main` deployment as green, but public
 `malickland.net` traffic still resolved through Cloudflare to the older VPS app at `31.97.58.203`.

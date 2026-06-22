@@ -1,5 +1,31 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-21 - Codex Owner-Side Cutover Runbook
+
+### Objective
+
+Capture the production cutover sequence as a repository-owned release gate instead of leaving it only in chat, while preserving the owner-only boundary for Cloudflare DNS, Vercel login, and production secrets.
+
+### Changes Made
+
+- Added `LAUNCH_CHECKLIST.md` section F, an owner-side Cloudflare/Vercel cutover gate.
+- Made `/listings` ownership an explicit blocker for DNS cutover in `TASKS.md`.
+- Added a critical task for completing the owner-side production cutover evidence after Vercel URL, env, Cloudflare, lead-delivery, and live-domain identity checks pass.
+
+### Verification
+
+- Documentation-only change; no DNS, Vercel, Cloudflare, secret, build, or runtime changes were made.
+- Relevant governance docs were reviewed before editing: `AGENTS.md`, `README.md`, `PROJECT_STATE.md`, `TASKS.md`, `DECISIONS.md`, `SECURITY.md`, `ARCHITECTURE.md`, `QA_CHECKLIST.md`, and recent `WORK_LOG.md`.
+
+### Remaining Risks
+
+- The Vercel `*.vercel.app` deployment URL, Vercel production environment variables, Cloudflare DNS/proxy/SSL mode, live lead delivery, `/api/health`, and `/api/config` remain unverified until the owner runs section F.
+- `/listings` ownership remains unresolved and continues to gate DNS cutover.
+
+### Recommended Next Task
+
+Resolve `/listings` route ownership in `ARCHITECTURE.md` and `DECISIONS.md`, then the owner can run `LAUNCH_CHECKLIST.md` section F in order.
+
 ## 2026-06-20 - Codex (production cutover gate)
 
 ### Objective
