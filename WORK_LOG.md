@@ -1,5 +1,33 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-23 - Codex Pin Vercel Framework Preset
+
+### Objective
+
+Fix the repo-side portion of the Vercel serving blocker before DNS cutover.
+
+### Evidence
+
+- Vercel project `malickland-net` still reported `framework: null`.
+- Public `https://malickland-net.vercel.app/` returned Vercel platform `404 NOT_FOUND`.
+- Live `https://malickland.net` still resolved to the VPS at `31.97.58.203`, so no public cutover had occurred.
+- Vercel documentation supports setting `"framework": "nextjs"` in `vercel.json` to override the project Framework Preset.
+
+### Changes Made
+
+- Added `vercel.json` with `"framework": "nextjs"`.
+- Updated `LAUNCH_CHECKLIST.md` section F to require another Vercel route check after this deployment before DNS changes.
+
+### Verification
+
+- Pending in this branch: local build gates and Vercel production deployment check after merge.
+
+### Remaining Risks
+
+- Vercel production environment variables still require owner-side confirmation.
+- Deployment Protection/public-domain behavior still requires verification after the new deployment.
+- Cloudflare DNS cutover and live inbox-confirmed lead testing remain owner-side launch steps.
+
 ## 2026-06-22 - Codex Defer Public Listings For Launch
 
 ### Objective

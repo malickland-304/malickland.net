@@ -72,7 +72,9 @@ Do not treat the site as launched until this gate passes.
 - [ ] Verify the Vercel production deployment URL itself is healthy before touching DNS:
       `/`, `/contact`, `/services`, `/services/property-intelligence-report`, and `/api/contact`
       must resolve on the `*.vercel.app` deployment. If they return Vercel `404`, stop and fix the
-      deployment/app configuration before changing DNS.
+      deployment/app configuration before changing DNS. On 2026-06-23, Vercel still reported the
+      project framework as `null`; `vercel.json` now pins `"framework": "nextjs"` so the next
+      production deployment should be checked again before any DNS change.
 - [x] Resolve `TASKS.md` "Resolve listings route ownership" before cutover. Launch decision:
       `/listings` is owned by the Next.js app as a property-search request page; public listing
       inventory and the Cloudflare Worker/listing subsystem are deferred until the data source,
