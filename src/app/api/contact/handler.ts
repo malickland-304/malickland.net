@@ -56,7 +56,7 @@ maybeUnrefInterval.unref?.();
 
 function getGmailConfig() {
   const user = process.env.GMAIL_USER?.trim();
-  const pass = process.env.GMAIL_APP_PASSWORD?.trim();
+  const pass = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, "");
 
   if (!user || !pass) return null;
   return { user, pass };
