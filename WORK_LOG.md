@@ -1,5 +1,27 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-28 - Codex Performance Baseline
+
+### Objective
+
+Capture an initial Vercel performance baseline for launch-critical routes.
+
+### Changes Made
+
+- Added `PERFORMANCE_BASELINE.md` with route status, HTML byte sizes, TTFB, total transfer time, and cache/header context for the Vercel deployment URL.
+- Marked the baseline performance task complete in `TASKS.md`.
+- Updated `QA_CHECKLIST.md` to point at the recorded baseline.
+
+### Verification
+
+- `curl` checks against `https://malickland-net.vercel.app/`, `/contact`, `/listings`, `/services`, and `/services/property-intelligence-report` all returned `200`.
+- Sampled total transfer times were all below 0.5s from the local Codex workstation.
+
+### Remaining Risks
+
+- This is an HTTP baseline only. Lighthouse, Web Vitals, browser CPU, keyboard accessibility, and responsive visual QA still require a separate browser-capable pass.
+- Browser plugin validation attempted in this session timed out and reset the browser runtime, so no browser/accessibility pass is claimed.
+
 ## 2026-06-28 - Codex Public Page Smoke Tests
 
 ### Objective
