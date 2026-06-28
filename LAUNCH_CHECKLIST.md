@@ -56,6 +56,7 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 - [x] Scoped lint passes: `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs`.
 - [x] `./node_modules/.bin/tsc --noEmit` passes.
 - [x] `npm run test:contact` passes.
+- [x] `npm run test:public-pages` passes after `npm run build`.
 - [ ] DNS/SSL topology verified (Squarespace DNS → Cloudflare → host); no deploy/DNS/Cloudflare
       change made without explicit owner sign-off (`AGENTS.md`).
 

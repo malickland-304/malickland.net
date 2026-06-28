@@ -1,5 +1,26 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-28 - Codex Public Page Smoke Tests
+
+### Objective
+
+Add a repeatable launch-critical public page smoke test so route checks are not only manual `curl` commands.
+
+### Changes Made
+
+- Added `scripts/smoke-public-pages.mjs`, a Node smoke runner that requires an existing production build, starts `next start` on a temporary localhost port, fetches launch-critical pages, verifies expected page text, and confirms GET `/api/contact` returns `405`.
+- Added `npm run test:public-pages`.
+- Updated `README.md`, `QA_CHECKLIST.md`, `LAUNCH_CHECKLIST.md`, and `TASKS.md` to include the new check and mark the first automated public-page test task complete.
+
+### Verification
+
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` -> pass.
+- `npm run test:public-pages` -> pass for `/`, `/contact`, `/listings`, `/services`, `/services/deal-facilitation`, `/services/property-intelligence-report`, `/services/seller-readiness-checkup`, and `/api/contact`.
+
+### Remaining Risks
+
+- This is a route/content smoke test, not a browser accessibility, keyboard, responsive layout, or visual regression test.
+
 ## 2026-06-28 - Codex Cutover Readiness Evidence
 
 ### Objective
