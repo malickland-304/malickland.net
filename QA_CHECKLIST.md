@@ -34,7 +34,7 @@ Last updated: 2026-06-28
 - [ ] Worker validation and XSS-focused tests.
 - [x] Public page route smoke checks: `npm run test:public-pages` passed on 2026-06-28 after a production build; it verifies launch-critical routes and `/api/contact` GET method handling against `next start`.
 - [ ] Accessibility/browser smoke checks for public pages.
-- [ ] Performance baseline for homepage, listings, and contact form.
+- [x] Performance baseline for homepage, listings, and contact form: `PERFORMANCE_BASELINE.md` records initial Vercel HTTP timing and HTML byte-size evidence on 2026-06-28.
 
 ## Verification Truthfulness
 
