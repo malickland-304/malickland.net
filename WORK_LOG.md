@@ -1,5 +1,34 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-28 - Codex Cutover Readiness Evidence
+
+### Objective
+
+Continue the production cutover gate after PR #17 was merged, proving what is ready on Vercel and what still remains owner-gated.
+
+### Evidence
+
+- Local `main` is clean and synced to `origin/main` at `7f0d7fd` (`Fix listings ownership and attribution tracking (#17)`).
+- Vercel project link is configured locally for `malicklands-projects/malickland-net`.
+- `vercel env ls production --scope malicklands-projects --cwd /Users/yhyh7/malickland.net` shows encrypted Production variables for `GMAIL_USER` and `GMAIL_APP_PASSWORD`.
+- `https://malickland-net.vercel.app/`, `/contact`, `/services`, and `/services/property-intelligence-report` returned `200`.
+- `https://malickland-net.vercel.app/api/contact` returned `405` for GET, proving the route is deployed and rejecting the wrong method.
+- `https://malickland.net/` still resolves to `31.97.58.203`; `/api/health` and `/api/config` still identify the old VPS app; `/api/contact` on the apex still returns `404`.
+
+### Verification
+
+- `npm audit --omit=dev` -> 0 vulnerabilities.
+- `npm run test:contact` -> 15/15 pass.
+- `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs` -> pass.
+- `./node_modules/.bin/tsc --noEmit` -> pass.
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` -> pass.
+
+### Remaining Risks
+
+- Vercel env names are present, but the hidden Gmail app password value is not proven correct until an owner-approved real lead test succeeds.
+- No Cloudflare DNS, SSL mode, routing, Vercel secret, or production email value change was performed.
+- The live apex still serves the old VPS lane; DNS cutover and inbox-confirmed lead delivery remain open in `LAUNCH_CHECKLIST.md` section F.
+
 ## 2026-06-28 - Codex
 
 ### Objective

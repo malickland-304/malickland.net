@@ -1,6 +1,6 @@
 # MalickLand Launch Checklist
 
-Last updated: 2026-06-21
+Last updated: 2026-06-28
 
 **Purpose:** the single pre-go-live gate. This ties the **lead-safety gate** and the
 **compliance gate** from `COMPLIANCE_ROADMAP.md` into one pass/fail list. A page or the site does
@@ -26,7 +26,7 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 - [ ] Service-interest + timeline fields preserved end-to-end (already covered by `npm run test:contact`).
 - [ ] **Failure path verified:** with mail misconfigured/unreachable, the user sees an error and the
       form does **not** report false success. No lead silently drops.
-- [ ] Required Gmail env vars (`GMAIL_USER`, `GMAIL_APP_PASSWORD`) present in the deploy environment
+- [x] Required Gmail env vars (`GMAIL_USER`, `GMAIL_APP_PASSWORD`) present in the deploy environment
       (names only — never commit secrets).
 - [ ] Consent line present on the form.
 - [ ] (Recommended) Basic abuse/rate-limit control in place or the gap explicitly accepted for launch
@@ -51,11 +51,11 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 
 ## E. Build / deploy verification (run before promoting)
 
-- [ ] `npm audit --omit=dev` → 0 production vulnerabilities (or documented mitigation).
-- [ ] `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` passes.
-- [ ] Scoped lint passes: `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs`.
-- [ ] `./node_modules/.bin/tsc --noEmit` passes.
-- [ ] `npm run test:contact` passes.
+- [x] `npm audit --omit=dev` → 0 production vulnerabilities (or documented mitigation).
+- [x] `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` passes.
+- [x] Scoped lint passes: `npm run lint -- --no-warn-ignored --no-error-on-unmatched-pattern src next.config.ts eslint.config.mjs`.
+- [x] `./node_modules/.bin/tsc --noEmit` passes.
+- [x] `npm run test:contact` passes.
 - [ ] DNS/SSL topology verified (Squarespace DNS → Cloudflare → host); no deploy/DNS/Cloudflare
       change made without explicit owner sign-off (`AGENTS.md`).
 
@@ -69,19 +69,26 @@ As of 2026-06-20, GitHub/Vercel showed the merged `main` deployment as green, bu
 `malickland.net` traffic still resolved through Cloudflare to the older VPS app at `31.97.58.203`.
 Do not treat the site as launched until this gate passes.
 
-- [ ] Verify the Vercel production deployment URL itself is healthy before touching DNS:
+- [x] Verify the Vercel production deployment URL itself is healthy before touching DNS:
       `/`, `/contact`, `/services`, `/services/property-intelligence-report`, and `/api/contact`
       must resolve on the `*.vercel.app` deployment. If they return Vercel `404`, stop and fix the
       deployment/app configuration before changing DNS. On 2026-06-23, Vercel still reported the
       project framework as `null`; `vercel.json` now pins `"framework": "nextjs"` so the next
-      production deployment should be checked again before any DNS change.
+      production deployment should be checked again before any DNS change. Rechecked 2026-06-28:
+      `https://malickland-net.vercel.app/`, `/contact`, `/services`, and
+      `/services/property-intelligence-report` returned `200`; `/api/contact` resolved and returned
+      `405` for GET, which proves the route is deployed.
 - [x] Resolve `TASKS.md` "Resolve listings route ownership" before cutover. Launch decision:
       `/listings` is owned by the Next.js app as a property-search request page; public listing
       inventory and the Cloudflare Worker/listing subsystem are deferred until the data source,
       route ownership, and review process are verified.
 - [ ] Confirm Vercel production environment variables are present and correct:
       `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and, if durable rate limiting is required,
-      `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`.
+      `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`. Rechecked
+      2026-06-28 with `vercel env ls production --scope malicklands-projects --cwd
+      /Users/yhyh7/malickland.net`: `GMAIL_USER` and `GMAIL_APP_PASSWORD` are present as encrypted
+      Production variables. Secret correctness is still unproven until the owner-approved real lead
+      test succeeds.
 - [ ] Owner updates Cloudflare DNS deliberately: remove the old VPS pinning to `31.97.58.203`,
       point apex/`www` at the intended Vercel records, and choose proxied vs DNS-only plus SSL mode
       intentionally.
