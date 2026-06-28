@@ -312,7 +312,7 @@ function buildListingPageHTML(L) {
   ${hasImages ? `<meta property="og:image" content="${escH(images[0].slice(0, 200))}"/>` : ''}
   <meta name="twitter:card" content="summary_large_image"/>
   <link rel="canonical" href="${escH(L.url || '')}"/>
-  <script type="application/ld+json">${JSON.stringify(schema)}</script>
+  <script type="application/ld+json">${safeJsonForScript(schema)}</script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -599,9 +599,9 @@ async function submitLead(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name, phone, email, message,
-        listingSlug: '${escH(L.slug || '')}',
-        listingTitle: '${escH(L.title || '')}',
-        listingPrice: ${L.price || 'null'},
+        listingSlug: ${safeJsonForScript(L.slug || '')},
+        listingTitle: ${safeJsonForScript(L.title || '')},
+        listingPrice: ${safeJsonForScript(L.price ?? null)},
       }),
     });
     const data = await res.json();
@@ -609,12 +609,12 @@ async function submitLead(e) {
       document.getElementById('lead-form').classList.add('hidden');
       document.getElementById('form-success').classList.add('show');
     } else {
-      alert('Something went wrong. Please call us at ${escH(L.agentPhone || BRAND.phone)}.');
+      alert('Something went wrong. Please call us at ' + ${safeJsonForScript(L.agentPhone || BRAND.phone)} + '.');
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Request Information';
     }
   } catch(err) {
-    alert('Unable to submit. Please call ${escH(L.agentPhone || BRAND.phone)} directly.');
+    alert('Unable to submit. Please call ' + ${safeJsonForScript(L.agentPhone || BRAND.phone)} + ' directly.');
     btn.disabled = false;
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Request Information';
   }
@@ -692,6 +692,15 @@ function json(data, status = 200, corsHeaders = getCorsHeaders()) {
 function escH(str) {
   if (typeof str !== 'string') str = String(str || '');
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function safeJsonForScript(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003C')
+    .replace(/>/g, '\\u003E')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
 }
 
 function generateId() {

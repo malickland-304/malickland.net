@@ -1,5 +1,33 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-28 - Codex Worker Hardening Tests
+
+### Objective
+
+Add focused tests for the deferred Cloudflare Worker listing subsystem and fix test-proven script-context escaping gaps without changing production routing.
+
+### Changes Made
+
+- Added `npm run test:worker`.
+- Added `listing-system/workers/worker.test.mjs` covering CORS allow/fallback behavior, `/listings` redirect ownership, save auth rejection, save payload limits, lead required-field validation, and listing page script-context escaping.
+- Added `safeJsonForScript()` in `listing-system/workers/worker.js` and used it for JSON-LD plus inline JavaScript listing values so attacker-controlled listing text cannot emit raw `</script>` sequences.
+- Updated `README.md`, `QA_CHECKLIST.md`, `TASKS.md`, and this work log.
+
+### Verification
+
+- `npm run test:worker` -> 7/7 pass.
+- `node --check listing-system/workers/worker.js` -> pass.
+- `node --check listing-system/workers/worker.test.mjs` -> pass.
+- `npm run test:contact` -> 15/15 pass.
+- `npm run test:public-pages` -> pass.
+- `npm run lint` -> pass.
+- `CI=1 NEXT_TELEMETRY_DISABLED=1 npm run build` -> pass.
+- `git diff --check` -> pass.
+
+### Remaining Risks
+
+- The Worker/listing subsystem is still deferred for launch and must not be routed in front of production until Cloudflare account/KV ownership, data source, durable lead abuse controls, stricter Worker field validation, and listing-manager/backend review are completed.
+
 ## 2026-06-28 - Codex Performance Baseline
 
 ### Objective

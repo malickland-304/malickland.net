@@ -20,6 +20,7 @@ Last updated: 2026-06-28
 - [ ] `npm audit`
 - [ ] `npm run lint`
 - [ ] `npm run test:contact`
+- [ ] `npm run test:worker`
 - [ ] `npm run test:public-pages` after `npm run build`
 - [ ] `npm run build`
 
@@ -31,7 +32,7 @@ Last updated: 2026-06-28
 - [x] Default lint script scope: `npm run lint` now runs `eslint src next.config.ts eslint.config.mjs` and passed on 2026-06-19.
 - [x] Dependency/analytics validation: `npm ci --ignore-scripts`, `npm audit --omit=dev`, full `npm audit`, `npm run test:contact`, and `npm run build` passed on 2026-06-19.
 - [ ] Route-handler mail-send tests for `/api/contact`.
-- [ ] Worker validation and XSS-focused tests.
+- [x] Worker validation and XSS-focused tests: `npm run test:worker` passed on 2026-06-28 for CORS, `/listings` redirect ownership, save auth/payload limits, lead required fields, and listing page script-context escaping.
 - [x] Public page route smoke checks: `npm run test:public-pages` passed on 2026-06-28 after a production build; it verifies launch-critical routes and `/api/contact` GET method handling against `next start`.
 - [ ] Accessibility/browser smoke checks for public pages.
 - [x] Performance baseline for homepage, listings, and contact form: `PERFORMANCE_BASELINE.md` records initial Vercel HTTP timing and HTML byte-size evidence on 2026-06-28.

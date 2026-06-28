@@ -48,6 +48,7 @@ Useful checks:
 ```bash
 npm run lint
 npm run test:contact
+npm run test:worker
 npm run build
 npm run test:public-pages
 npm audit
