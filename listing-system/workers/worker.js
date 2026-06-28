@@ -33,11 +33,20 @@ const BRAND = {
   colors: { forest: '#1C3A1C', forestDark: '#142814', gold: '#C4A040', goldLight: '#D4B050' },
 };
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+const ALLOWED_ORIGINS = ['https://malickland.net', 'https://www.malickland.net', 'http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'];
+const DEFAULT_CORS_ORIGIN = 'https://malickland.net';
+const SAVE_PAYLOAD_LIMIT_BYTES = 500_000;
+const LEAD_PAYLOAD_LIMIT_BYTES = 10_000;
+
+function getCorsHeaders(request) {
+  const origin = request?.headers.get('Origin');
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : DEFAULT_CORS_ORIGIN;
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+}
 
 // ─── MAIN HANDLER ─────────────────────────────────────────────────────────────
 export default {
@@ -46,9 +55,11 @@ export default {
     const path = url.pathname;
     const method = request.method;
 
+    const corsHeaders = getCorsHeaders(request);
+
     // CORS preflight
     if (method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     try {
@@ -56,24 +67,24 @@ export default {
       if (method === 'POST' && path === '/api/save') return handleSave(request, env);
       if (method === 'POST' && path === '/api/lead') return handleLead(request, env);
       if (method === 'GET' && path === '/api/listings') return handleApiListings(request, env);
-      if (method === 'GET' && path === '/api/health') return json({ ok: true, ts: Date.now() });
+      if (method === 'GET' && path === '/api/health') return json({ ok: true, ts: Date.now() }, 200, corsHeaders);
 
       const apiSlugMatch = path.match(/^\/api\/listing\/([a-z0-9-]+)$/);
-      if (apiSlugMatch) return handleApiListing(apiSlugMatch[1], env);
+      if (apiSlugMatch) return handleApiListing(request, apiSlugMatch[1], env);
 
       // ── Page Routes ──
       if (method === 'GET' && (path === '/listings' || path === '/listings/')) {
-        return renderListingsIndex(env);
+        return Response.redirect('https://malickland.net/listings', 301);
       }
       const slugMatch = path.match(/^\/listing\/([a-z0-9-]+)\/?$/);
-      if (method === 'GET' && slugMatch) return renderListingPage(slugMatch[1], env);
+      if (method === 'GET' && slugMatch) return renderListingPage(request, slugMatch[1], env);
 
     } catch (err) {
       console.error(err);
-      return new Response(`Internal error: ${err.message}`, { status: 500 });
+      return new Response(`Internal error: ${err.message}`, { status: 500, headers: corsHeaders });
     }
 
-    return render404();
+    return render404(request);
   }
 };
 
@@ -82,17 +93,22 @@ async function handleSave(request, env) {
   // Auth check
   const authHeader = request.headers.get('Authorization') || '';
   const token = authHeader.replace('Bearer ', '').trim();
+  const corsHeaders = getCorsHeaders(request);
   if (!token || token !== env.API_TOKEN) {
-    return json({ success: false, error: 'Unauthorized' }, 401);
+    return json({ success: false, error: 'Unauthorized' }, 401, corsHeaders);
   }
 
   let listing;
-  try { listing = await request.json(); }
-  catch (e) { return json({ success: false, error: 'Invalid JSON' }, 400); }
+  try {
+    const text = await request.text();
+    if (text.length > SAVE_PAYLOAD_LIMIT_BYTES) return json({ success: false, error: 'Payload too large' }, 413, corsHeaders);
+    listing = JSON.parse(text);
+  }
+  catch (e) { return json({ success: false, error: 'Invalid JSON' }, 400, corsHeaders); }
 
   // Validate required fields
   if (!listing.slug || !listing.title || !listing.price) {
-    return json({ success: false, error: 'Missing required fields: slug, title, price' }, 400);
+    return json({ success: false, error: 'Missing required fields: slug, title, price' }, 400, corsHeaders);
   }
 
   // Sanitize slug
@@ -120,17 +136,22 @@ async function handleSave(request, env) {
     slug: listing.slug,
     url: listing.url,
     id: listing.id,
-  }, 200);
+  }, 200, corsHeaders);
 }
 
 // ─── LEAD CAPTURE ─────────────────────────────────────────────────────────────
 async function handleLead(request, env) {
+  const corsHeaders = getCorsHeaders(request);
   let lead;
-  try { lead = await request.json(); }
-  catch (e) { return json({ success: false, error: 'Invalid JSON' }, 400); }
+  try {
+    const text = await request.text();
+    if (text.length > LEAD_PAYLOAD_LIMIT_BYTES) return json({ success: false, error: 'Payload too large' }, 413, corsHeaders);
+    lead = JSON.parse(text);
+  }
+  catch (e) { return json({ success: false, error: 'Invalid JSON' }, 400, corsHeaders); }
 
   if (!lead.name || !lead.phone && !lead.email) {
-    return json({ success: false, error: 'Name and phone or email required' }, 400);
+    return json({ success: false, error: 'Name and phone or email required' }, 400, corsHeaders);
   }
 
   // Basic spam protection: check CF-IPCountry
@@ -168,11 +189,12 @@ async function handleLead(request, env) {
     } catch(e) { console.error('Lead webhook failed:', e); }
   }
 
-  return json({ success: true, id: leadRecord.id }, 200);
+  return json({ success: true, id: leadRecord.id }, 200, corsHeaders);
 }
 
 // ─── API: ALL LISTINGS (JSON) ──────────────────────────────────────────────────
 async function handleApiListings(request, env) {
+  const corsHeaders = getCorsHeaders(request);
   const url = new URL(request.url);
   const status = url.searchParams.get('status');
   const type = url.searchParams.get('type');
@@ -185,14 +207,15 @@ async function handleApiListings(request, env) {
   if (type) listings = listings.filter(l => l.type?.toLowerCase() === type.toLowerCase());
   if (county) listings = listings.filter(l => l.county?.toLowerCase().includes(county.toLowerCase()));
 
-  return json({ listings, count: listings.length });
+  return json({ listings, count: listings.length }, 200, corsHeaders);
 }
 
 // ─── API: SINGLE LISTING (JSON) ───────────────────────────────────────────────
-async function handleApiListing(slug, env) {
+async function handleApiListing(request, slug, env) {
+  const corsHeaders = getCorsHeaders(request);
   const raw = await env.LISTINGS.get(`listing:${slug}`);
-  if (!raw) return json({ error: 'Listing not found' }, 404);
-  return json(JSON.parse(raw));
+  if (!raw) return json({ error: 'Listing not found' }, 404, corsHeaders);
+  return json(JSON.parse(raw), 200, corsHeaders);
 }
 
 // ─── INDEX MANAGEMENT ─────────────────────────────────────────────────────────
@@ -228,12 +251,12 @@ async function updateIndex(env, listing) {
 }
 
 // ─── RENDER LISTING PAGE ──────────────────────────────────────────────────────
-async function renderListingPage(slug, env) {
+async function renderListingPage(request, slug, env) {
   const raw = await env.LISTINGS.get(`listing:${slug}`);
-  if (!raw) return render404();
+  if (!raw) return render404(request);
   const L = JSON.parse(raw);
   return new Response(buildListingPageHTML(L), {
-    headers: { 'Content-Type': 'text/html;charset=UTF-8', ...CORS_HEADERS },
+    headers: { 'Content-Type': 'text/html;charset=UTF-8', ...getCorsHeaders(request) },
   });
 }
 
@@ -286,7 +309,7 @@ function buildListingPageHTML(L) {
   <meta property="og:description" content="${escH((L.description || '').slice(0, 200))}"/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="${escH(L.url || '')}"/>
-  ${hasImages ? `<meta property="og:image" content="${images[0].slice(0, 200)}"/>` : ''}
+  ${hasImages ? `<meta property="og:image" content="${escH(images[0].slice(0, 200))}"/>` : ''}
   <meta name="twitter:card" content="summary_large_image"/>
   <link rel="canonical" href="${escH(L.url || '')}"/>
   <script type="application/ld+json">${JSON.stringify(schema)}</script>
@@ -426,14 +449,14 @@ function buildListingPageHTML(L) {
 <!-- GALLERY -->
 <div class="gallery">
   ${hasImages
-    ? `<img id="gallery-main" class="gallery-main" src="${images[0]}" alt="${escH(L.title)}" />`
+    ? `<img id="gallery-main" class="gallery-main" src="${escH(images[0])}" alt="${escH(L.title)}" />`
     : `<div class="gallery-main-placeholder"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>`
   }
   <div class="status-badge">${escH(L.status || 'Active')}</div>
   ${hasImages ? `<div class="gallery-count">📷 ${images.length} photo${images.length !== 1 ? 's' : ''}</div>` : ''}
   ${hasImages && images.length > 1
     ? `<div class="gallery-strip">${images.map((src, i) =>
-        `<img class="gallery-thumb${i===0?' active':''}" src="${src}" alt="Photo ${i+1}" onclick="showPhoto(${i}, this)" />`
+        `<img class="gallery-thumb${i===0?' active':''}" src="${escH(src)}" alt="Photo ${i+1}" onclick="showPhoto(${i}, this)" />`
       ).join('')}</div>`
     : ''
   }
@@ -621,90 +644,7 @@ function buildDetailsGrid(L) {
     </div>`;
 }
 
-// ─── RENDER LISTINGS INDEX ────────────────────────────────────────────────────
-async function renderListingsIndex(env) {
-  const index = await getIndex(env);
-  const active = index.filter(l => l.status === 'Active' || !l.status);
 
-  const cards = active.length > 0
-    ? active.map(l => buildListingCard(l)).join('')
-    : `<div style="text-align:center;padding:60px 20px;color:#6b7280;">
-        <p style="font-size:18px;font-weight:600;">No active listings right now.</p>
-        <p style="margin-top:8px;">Contact Phil for off-market properties.</p>
-       </div>`;
-
-  return new Response(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WV Real Estate Listings | MalickLand</title>
-  <meta name="description" content="Browse homes, land, and commercial real estate for sale in West Virginia's Eastern Panhandle. MalickLand — Phil Malick, WV Licensed Real Estate Agent." />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; }
-    .nav { background: #1C3A1C; color: white; padding: 0 24px; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,.25); }
-    .nav-brand { font-weight: 800; font-size: 17px; text-decoration: none; color: white; display: flex; align-items: center; gap: 8px; }
-    .nav-sub { font-size: 9px; color: #86efac; letter-spacing: 3px; text-transform: uppercase; }
-    .header { background: #1C3A1C; padding: 40px 24px; }
-    .header-inner { max-width: 1100px; margin: 0 auto; }
-    .header h1 { color: white; font-size: 28px; font-weight: 800; margin-bottom: 6px; }
-    .header p { color: #9ca3af; font-size: 15px; }
-    .content { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    .card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; transition: box-shadow .2s; text-decoration: none; color: inherit; display: block; }
-    .card:hover { box-shadow: 0 8px 30px rgba(0,0,0,.12); transform: translateY(-2px); transition: all .2s; }
-    .card-img { height: 190px; overflow: hidden; background: linear-gradient(135deg, #1C3A1C, #254E25); display: flex; align-items: center; justify-content: center; position: relative; }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; }
-    .card-body { padding: 16px; }
-    .card-price { font-size: 20px; font-weight: 800; color: #1C3A1C; }
-    .card-title { font-size: 14px; font-weight: 700; color: #111; margin: 4px 0; }
-    .card-loc { font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; }
-    .card-stats { font-size: 12px; color: #374151; margin: 10px 0; display: flex; gap: 12px; }
-    .status-pill { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: white; }
-    .type-pill { position: absolute; top: 10px; right: 10px; background: rgba(28,58,28,.85); color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .footer { background: #142814; color: #9ca3af; text-align: center; padding: 28px 20px; font-size: 12px; margin-top: 48px; }
-    .footer a { color: #C4A040; }
-    .count-badge { background: #f0fdf4; border: 1px solid #86efac; color: #166534; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; display: inline-block; }
-    a.cta-link { display: inline-block; background: #C4A040; color: white; text-decoration: none; padding: 8px 18px; border-radius: 6px; font-weight: 700; font-size: 13px; }
-  </style>
-</head>
-<body>
-  <nav class="nav">
-    <a href="${BRAND.site}" class="nav-brand">
-      <div>
-        <div>MalickLand</div>
-        <div class="nav-sub">WV Real Estate Agency</div>
-      </div>
-    </a>
-    <a href="tel:${BRAND.phone.replace(/\D/g,'')}" class="cta-link">📞 ${BRAND.phone}</a>
-  </nav>
-  <div class="header">
-    <div class="header-inner">
-      <h1>WV Property Listings</h1>
-      <p>Homes, land, and commercial real estate across the Eastern Panhandle</p>
-    </div>
-  </div>
-  <div class="content">
-    <div class="count-badge">${active.length} Active Listing${active.length !== 1 ? 's' : ''}</div>
-    <div class="grid">${cards}</div>
-    <div style="margin-top:40px;background:#1C3A1C;border-radius:12px;padding:32px;text-align:center;color:white;">
-      <h2 style="font-size:20px;font-weight:800;margin-bottom:8px;">Don't See What You Need?</h2>
-      <p style="color:#9ca3af;margin-bottom:16px;">Phil has access to off-market properties. Tell us what you're looking for.</p>
-      <a href="${BRAND.site}/contact" style="background:#C4A040;color:white;text-decoration:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;display:inline-block;margin-right:10px;">Contact Phil</a>
-      <a href="tel:${BRAND.phone.replace(/\D/g,'')}" style="border:2px solid rgba(255,255,255,.4);color:white;text-decoration:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;display:inline-block;">📞 ${BRAND.phone}</a>
-    </div>
-  </div>
-  <footer class="footer">
-    <p style="font-weight:700;color:white;font-size:14px;margin-bottom:4px;">MalickLand</p>
-    <p><a href="tel:${BRAND.phone.replace(/\D/g,'')}">${BRAND.phone}</a> · <a href="mailto:${BRAND.email}">${BRAND.email}</a></p>
-    <p style="margin-top:10px;font-size:10px;color:#374151;">Information deemed reliable but not guaranteed. Equal Housing Opportunity.</p>
-  </footer>
-</body>
-</html>`, {
-    headers: { 'Content-Type': 'text/html;charset=UTF-8', ...CORS_HEADERS },
-  });
-}
 
 function buildListingCard(l) {
   const price = l.price ? '$' + Number(l.price).toLocaleString() : 'TBD';
@@ -719,7 +659,7 @@ function buildListingCard(l) {
   return `
     <a href="/listing/${escH(l.slug)}" class="card">
       <div class="card-img">
-        ${l.cover ? `<img src="${l.cover}" alt="${escH(l.title)}" loading="lazy" />` : ''}
+        ${l.cover ? `<img src="${escH(l.cover)}" alt="${escH(l.title)}" loading="lazy" />` : ''}
         <span class="status-pill" style="background:${statusColor}">${escH(l.status||'Active')}</span>
         <span class="type-pill">${escH(l.type||'Property')}</span>
       </div>
@@ -733,19 +673,19 @@ function buildListingCard(l) {
 }
 
 // ─── 404 ─────────────────────────────────────────────────────────────────────
-function render404() {
+function render404(request) {
   return new Response(`<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>404 — MalickLand</title>
 <style>body{font-family:system-ui,sans-serif;background:#f9fafb;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;} .box{max-width:400px;} h1{font-size:64px;font-weight:900;color:#1C3A1C;} p{color:#6b7280;margin:8px 0 20px;} a{background:#C4A040;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;}</style>
 </head><body><div class="box"><h1>404</h1><p>This page doesn't exist.</p><a href="${BRAND.site}">Back to MalickLand</a></div></body></html>`,
-  { status: 404, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+  { status: 404, headers: { 'Content-Type': 'text/html;charset=UTF-8', ...getCorsHeaders(request) } });
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
-function json(data, status = 200) {
+function json(data, status = 200, corsHeaders = getCorsHeaders()) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 }
 

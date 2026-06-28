@@ -1,6 +1,6 @@
 # Malickland 2.0 QA Checklist
 
-Last updated: 2026-06-19
+Last updated: 2026-06-28
 
 ## Required Before A Task Is Complete
 
@@ -30,7 +30,6 @@ Last updated: 2026-06-19
 - [x] Default lint script scope: `npm run lint` now runs `eslint src next.config.ts eslint.config.mjs` and passed on 2026-06-19.
 - [x] Dependency/analytics validation: `npm ci --ignore-scripts`, `npm audit --omit=dev`, full `npm audit`, `npm run test:contact`, and `npm run build` passed on 2026-06-19.
 - [ ] Route-handler mail-send tests for `/api/contact`.
-- [ ] Listing fetch fallback tests for `/listings`.
 - [ ] Worker validation and XSS-focused tests.
 - [ ] Accessibility/browser smoke checks for public pages.
 - [ ] Performance baseline for homepage, listings, and contact form.
