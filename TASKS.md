@@ -1,6 +1,6 @@
 # Malickland 2.0 Tasks
 
-Last updated: 2026-06-21
+Last updated: 2026-06-28
 
 ## Critical
 
@@ -14,14 +14,14 @@ Last updated: 2026-06-21
 
 ## High Priority
 
-- [ ] Persist landing attribution across internal navigation - acceptance: original `utm_*`/`referrer`/landing path captured on first page load (e.g. saved to `sessionStorage` in the root layout) and read by the contact form, so attribution survives client-side navigation (e.g. `/?utm_source=…` → `/contact`) instead of only being captured on `ContactForm` mount - dependencies: none - status: open; follow-up to the merged attribution work (raised by gemini-code-assist on PR #9). Current behavior still captures attribution correctly for direct visits and full page loads; this hardens the internal-nav case.
+- [x] Persist landing attribution across internal navigation - acceptance: original `utm_*`/`referrer`/landing path captured on first page load (e.g. saved to `sessionStorage` in the root layout) and read by the contact form, so attribution survives client-side navigation (e.g. `/?utm_source=…` → `/contact`) instead of only being captured on `ContactForm` mount - verification: `AttributionTracker` is mounted in the root layout, uses shared guarded attribution helpers in `src/lib/attribution.ts`, stores first-load attribution in `sessionStorage` when available, and `ContactForm` reads the stored value before falling back to current URL attribution; `npm run test:contact`, `npm run lint`, and `npm run build` passed - date/agent: 2026-06-28/Codex.
 - [x] Decide whether to track `listing-system/` - acceptance: decision records ownership, deployment path, security requirements, and files to include/exclude - verification: `listing-system/` remains tracked as future work, but public listing inventory and Worker routing are deferred for launch until data source, account/KV ownership, security, route ownership, and review steps are verified - date/agent: 2026-06-22/Codex.
 - [x] Add environment documentation - acceptance: `.env.example` and README document `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and deployment secret handling without real secrets - verification: `.env.example` contains names/placeholders only and README documents contact env usage; removed stale launch-time `LISTINGS_API_URL` docs after listings feed deferral - date/agent: 2026-06-22/Codex.
 - [x] Publish revenue offer pages - acceptance: `/services`, `/services/deal-facilitation`, `/services/property-intelligence-report`, and `/services/seller-readiness-checkup` exist with direct CTAs into contact intake; MEDjAi offers include not-an-appraisal disclaimers - verification: local route files added and offer CTAs point to `/contact?service=...` - date/agent: 2026-06-07/Codex.
 - [x] Add service-tagged lead intake - acceptance: contact form includes service interest and timeline fields, URL service params preselect the service, and `/api/contact` includes those fields in validated email output - verification: `npm run test:contact` passed 7/7 with the existing module-type warning - date/agent: 2026-06-07/Codex.
 - [x] Add durable contact abuse protection - acceptance: `/api/contact` has production-suitable rate limiting or equivalent abuse controls documented with deployment assumptions and failure behavior - verification: route-level tests cover allowed and limited submissions, `npm run test:contact` covers validation + route behavior, and docs/env template document Redis REST deployment assumptions plus local memory fallback - date/agent: 2026-06-19/Codex.
 - [ ] Add first automated tests - acceptance: contact route validation and launch-critical public pages have repeatable checks in package scripts - dependencies: browser/page test approach - status: partial; contact validation has `npm run test:contact`; listings feed fallback was removed for launch.
-- [ ] Worker security hardening - acceptance: origin/CORS policy, payload limits, field validation, image URL safety, lead abuse controls, and XSS-sensitive template contexts are reviewed and tested - dependencies: Worker deployment decision - status: open.
+- [ ] Worker security hardening - acceptance: origin/CORS policy, payload limits, field validation, image URL safety, lead abuse controls, and XSS-sensitive template contexts are reviewed and tested - dependencies: Worker deployment decision - status: partial; CORS allowlist, named payload limits, request-specific CORS headers, and image URL attribute escaping were added on 2026-06-28, but Worker-specific tests, lead abuse controls, field validation, and full HTML/script XSS review remain open.
 
 ## Medium Priority
 

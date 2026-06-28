@@ -2,41 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { serviceInterests } from "./contact-options";
-
-type LeadAttribution = {
-  sourcePath?: string;
-  serviceTag?: string;
-  utmSource?: string;
-  utmMedium?: string;
-  utmCampaign?: string;
-  utmTerm?: string;
-  utmContent?: string;
-  referrer?: string;
-  submittedAt?: string;
-};
-
-// Captured once on mount: the landing context that drove this lead. UTM and
-// service tags come from the URL the visitor arrived on; referrer/path are
-// best-effort. These are echoed by /api/contact for lead-source tracking.
-function captureLandingAttribution(): LeadAttribution {
-  if (typeof window === "undefined") return {};
-
-  const params = new URLSearchParams(window.location.search);
-  const pick = (key: string) => params.get(key)?.trim() || undefined;
-
-  const attribution: LeadAttribution = {
-    sourcePath: `${window.location.pathname}${window.location.search}`,
-    serviceTag: pick("service") || pick("offer"),
-    utmSource: pick("utm_source"),
-    utmMedium: pick("utm_medium"),
-    utmCampaign: pick("utm_campaign"),
-    utmTerm: pick("utm_term"),
-    utmContent: pick("utm_content"),
-    referrer: document.referrer || undefined,
-  };
-
-  return attribution;
-}
+import {
+  captureLandingAttribution,
+  type LeadAttribution,
+} from "@/lib/attribution";
 
 const counties = [
   "Berkeley County",

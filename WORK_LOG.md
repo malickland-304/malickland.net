@@ -1,5 +1,31 @@
 # Malickland 2.0 Work Log
 
+## 2026-06-28 - Codex
+
+### Objective
+
+Rebase PR #17 onto current `main`, preserve the launch decision that public listings are deferred, and address Gemini/Sourcery review feedback without reintroducing a public listings feed.
+
+### Changes Made
+
+- Kept current `main` behavior for `/listings`: a launch-safe property-search request page with no listing API fetch and no fallback/sample properties.
+- Kept current `main` footer compliance implementation (`LicensedOfficeDisclosure`) instead of restoring draft placeholder/disclosure text.
+- Added `src/lib/attribution.ts` as a shared, guarded attribution helper.
+- Added `src/components/AttributionTracker.tsx` and mounted it in `src/app/layout.tsx` so first-load path, `service`/`offer`, `utm_*`, and referrer are stored in `sessionStorage` when available.
+- Updated `src/app/contact/ContactForm.tsx` to read stored attribution before falling back to current URL attribution.
+- Hardened deferred Worker API paths with named payload limits, origin-aware CORS helpers, request-specific CORS headers, and image URL attribute escaping.
+- Updated `ARCHITECTURE.md`, `DECISIONS.md`, `PROJECT_STATE.md`, `TASKS.md`, `QA_CHECKLIST.md`, and this work log to match the rebased scope.
+
+### Verification
+
+- Pending after conflict resolution: `npm run test:contact`, `npm run lint`, `git diff --check`, and `npm run build`.
+
+### Remaining Risks
+
+- No production deploy, Vercel setting, Cloudflare route, DNS, or secret/env change was performed.
+- Worker-specific tests for lead abuse controls, field validation, and remaining HTML/script XSS contexts still need to be added before enabling the listing subsystem.
+- Owner-side production cutover remains governed by `LAUNCH_CHECKLIST.md` section F.
+
 ## 2026-06-23 - Codex Pin Vercel Framework Preset
 
 ### Objective

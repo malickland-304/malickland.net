@@ -1,6 +1,6 @@
 # Malickland 2.0 Architecture
 
-Last updated: 2026-06-22
+Last updated: 2026-06-28
 
 ## Current System
 
@@ -38,6 +38,14 @@ The `listing-system/` directory is tracked for future work but deferred for laun
 3. Future listing-system path, not launch-active: Cloudflare Worker stores listing records in KV and updates the `__index` key.
 4. Future listing-system path, not launch-active: Worker optionally forwards lead data to a Google Apps Script webhook.
 5. Vercel Analytics collects page analytics from the global App Router layout when the app is deployed on a supported Vercel runtime. GA4 is not currently installed and remains a separate future decision.
+
+## Attribution Flow
+
+The root layout mounts `AttributionTracker`, which captures first-load path,
+`service`/`offer`, `utm_*`, and referrer values into `sessionStorage` when
+browser storage is available. The contact form reads that stored attribution
+before falling back to the current URL, so source context survives client-side
+navigation to `/contact`.
 
 ## Architectural Stability
 

@@ -1,5 +1,19 @@
 # Malickland 2.0 Decisions
 
+## 2026-06-28 - Persist Landing Attribution In Root Layout
+
+Problem: The merged contact form captured attribution on contact-form mount. That preserved source data for direct `/contact` visits, but a visitor landing on another page with UTMs and then navigating internally to `/contact` could lose the original landing path and campaign context.
+
+Decision: Mount a small client-side attribution tracker in the root layout. It stores first-load path, `service`/`offer`, `utm_*`, and referrer values in `sessionStorage` when browser storage is available. The contact form reads that stored attribution before falling back to the current URL.
+
+Reasoning: This preserves attribution across internal navigation without changing the `/api/contact` schema or blocking lead submission when storage is unavailable. Storage access is guarded because privacy modes and sandboxed contexts can throw on `sessionStorage`.
+
+Alternatives considered: server-side cookies, URL propagation through every internal link, and only capturing attribution on `/contact`. Cookies add consent and persistence concerns; URL propagation is brittle; contact-only capture leaves the known internal-navigation gap.
+
+Security/performance impact: No secrets or personal data are stored. Only campaign/path/referrer metadata is stored client-side for the current tab session. If storage fails, the form falls back to current URL attribution and still submits.
+
+Files affected: `src/lib/attribution.ts`, `src/components/AttributionTracker.tsx`, `src/app/layout.tsx`, `src/app/contact/ContactForm.tsx`, `TASKS.md`, `WORK_LOG.md`.
+
 ## 2026-06-22 - Defer Public Listings Feed For Launch
 
 Problem: `/listings` fetched `LISTINGS_API_URL` or `https://malickland.net/api/listings`, but the cutover target does not currently own a verified production listings API. The page also had hardcoded fallback properties, which could expose sample inventory as if it were active real estate listings.
