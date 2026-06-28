@@ -49,8 +49,13 @@ Useful checks:
 npm run lint
 npm run test:contact
 npm run build
+npm run test:public-pages
 npm audit
 ```
+
+`npm run test:public-pages` expects a completed production build. Run it after
+`npm run build`; it starts `next start` on a temporary localhost port and checks
+the launch-critical public routes plus `/api/contact` GET method handling.
 
 ## Environment Variables
 
