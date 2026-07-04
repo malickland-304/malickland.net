@@ -2,6 +2,18 @@
 
 Last updated: 2026-06-28
 
+## Owner actions to reach launch (added 2026-06-28 — see GO_LIVE_RUNBOOK.md)
+
+- [ ] Run `GO_LIVE_RUNBOOK.md` Steps 1–2 (verify Vercel deployment serves; verify lead email
+      end-to-end with a real test submission).
+- [ ] Apply `supabase/migrations/0001_contact_leads_backup.sql` in the Supabase SQL editor and add
+      `LEAD_BACKUP_SUPABASE_URL` / `LEAD_BACKUP_SUPABASE_KEY` to Vercel production env (Step 3).
+      Note: agent could not apply the migration via MCP in this session (approval stream failures);
+      it is committed but UNVERIFIED against the live database.
+- [ ] Cut `malickland.net` DNS over from the old VPS (`31.97.58.203`) to Vercel (Step 4), then
+      re-verify routes + one live lead.
+- [ ] Weekly: check `contact_leads` for `email_delivered = false` rows and contact those leads.
+
 ## Critical
 
 - [x] Resolve the 3 compliance publish blockers - acceptance: owner confirms (1) Phil's licensed title/byline, (2) NAR/REALTOR® status, (3) licensed office of record + responsible broker; values recorded in `COMPLIANCE_ROADMAP.md` and `LAUNCH_CHECKLIST.md` section A - verification: owner confirmed 2026-06-20 the established MalickLand info (title "WV Licensed Real Estate Agent"; REALTOR® mark not used; office MalickLand — WV Real Estate Agency, 501 East Main Street, Romney, WV 26757, (540) 246-1421); recorded in `COMPLIANCE_ROADMAP.md` blockers, `LAUNCH_CHECKLIST.md` §A, and `src/lib/compliance.ts`; exact statutory wording left owner/legal-confirmable - date/agent: 2026-06-20/Claude.

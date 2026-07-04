@@ -49,3 +49,19 @@ Last updated: 2026-06-19
 ## Safety Stop Conditions
 
 Agents must stop and document blockers in `WORK_LOG.md` and `TASKS.md` when security implications are unclear, credentials are missing, production data could be affected, destructive changes are required, or infrastructure changes cannot be verified safely.
+
+## Lead Backup Store (Supabase) — 2026-06-28
+
+- Every validated contact submission may be persisted to Supabase table `contact_leads`
+  (PII: name, email, phone, message, attribution) when `LEAD_BACKUP_SUPABASE_URL` +
+  `LEAD_BACKUP_SUPABASE_KEY` are configured. Purpose: lead-safety gate ("no lead silently drops").
+- The shipped key is the Supabase **publishable/anon** key (non-secret by design). RLS grants
+  INSERT only; no select/update/delete policies exist, so that key cannot read or tamper with
+  stored leads. Reading requires the Supabase dashboard/service role.
+- Known bounded risk: anyone with the publishable key can insert rows directly (spam), but cannot
+  read PII. Rows are size-capped via CHECK constraints. If table spam appears, rotate the
+  publishable key or switch to a service-role-only insert path (documented in DECISIONS.md).
+- Double-failure path (mail failed AND backup unavailable): the sanitized lead is written to
+  server logs (Vercel) as last-resort recovery. This intentionally places PII in logs only when
+  the alternative is silent loss; log access is limited to the Vercel team.
+- Never commit any Supabase key; env names are documented in `.env.example`.

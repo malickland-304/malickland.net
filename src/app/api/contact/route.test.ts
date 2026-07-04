@@ -225,3 +225,118 @@ test("handleContactPost fails closed when Redis rate-limit request times out", a
     }
   }
 });
+
+// ── Lead backup store (lead-safety gate: no lead silently drops) ──────────────
+
+function stubLeadStore() {
+  const calls: Array<{
+    data: ContactSubmission;
+    delivery: { emailDelivered: boolean; emailError?: string };
+  }> = [];
+  return {
+    calls,
+    store: {
+      async persist(
+        data: ContactSubmission,
+        delivery: { emailDelivered: boolean; emailError?: string }
+      ) {
+        calls.push({ data, delivery });
+        return { attempted: true as const, stored: true };
+      },
+    },
+  };
+}
+
+const allowAllRateLimiter = {
+  async check() {
+    return { allowed: true, limit: 5, remaining: 4 };
+  },
+};
+
+test("lead backup records delivered leads without changing the success response", async () => {
+  const backup = stubLeadStore();
+
+  const response = await handleContactPost(contactRequest(validPayload), {
+    getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+    rateLimiter: allowAllRateLimiter,
+    async sendMail() {},
+    leadStore: backup.store,
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { success: true });
+  assert.equal(backup.calls.length, 1);
+  assert.equal(backup.calls[0].delivery.emailDelivered, true);
+  assert.equal(backup.calls[0].data.email, "phil@example.com");
+});
+
+test("lead backup captures the lead when mail send fails; error response unchanged", async () => {
+  const backup = stubLeadStore();
+  const originalConsoleError = console.error;
+  console.error = () => {};
+
+  try {
+    const response = await handleContactPost(contactRequest(validPayload), {
+      getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+      rateLimiter: allowAllRateLimiter,
+      async sendMail() {
+        throw new Error("SMTP unavailable");
+      },
+      leadStore: backup.store,
+    });
+
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), {
+      error: "Failed to send message. Please try calling or emailing directly.",
+    });
+    assert.equal(backup.calls.length, 1);
+    assert.equal(backup.calls[0].delivery.emailDelivered, false);
+    assert.equal(backup.calls[0].delivery.emailError, "SMTP unavailable");
+  } finally {
+    console.error = originalConsoleError;
+  }
+});
+
+test("lead backup captures the lead when mail is not configured; 503 unchanged", async () => {
+  const backup = stubLeadStore();
+  const originalConsoleError = console.error;
+  console.error = () => {};
+
+  try {
+    const response = await handleContactPost(contactRequest(validPayload), {
+      getGmailConfig: () => null,
+      rateLimiter: allowAllRateLimiter,
+      leadStore: backup.store,
+    });
+
+    assert.equal(response.status, 503);
+    assert.equal(backup.calls.length, 1);
+    assert.equal(backup.calls[0].delivery.emailDelivered, false);
+    assert.equal(backup.calls[0].delivery.emailError, "mail_not_configured");
+  } finally {
+    console.error = originalConsoleError;
+  }
+});
+
+test("a throwing lead store never breaks the user response", async () => {
+  const originalConsoleError = console.error;
+  console.error = () => {};
+
+  try {
+    const response = await handleContactPost(contactRequest(validPayload), {
+      getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+      rateLimiter: allowAllRateLimiter,
+      async sendMail() {},
+      leadStore: {
+        async persist() {
+          throw new Error("store exploded");
+        },
+      },
+    });
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { success: true });
+  } finally {
+    console.error = originalConsoleError;
+  }
+});
