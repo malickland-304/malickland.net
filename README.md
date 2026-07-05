@@ -2,6 +2,14 @@
 
 **malickland.net** — The public-facing marketing website for MalickLand Real Estate Agency, serving the Eastern Panhandle of West Virginia.
 
+## Business Outcome
+
+This platform serves as the central hub for:
+- Generating and capturing client leads (buyers and sellers).
+- Showcasing active property listings.
+- Improving local SEO and market positioning in West Virginia.
+- Offering specialized real estate tech services like MEDjAi property intelligence reports.
+
 ## Stack
 
 - **Next.js 16** (App Router)
