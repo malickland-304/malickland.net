@@ -94,6 +94,10 @@ export function createLeadStore(): LeadStore {
           body: JSON.stringify(toLeadRow(data, delivery)),
         });
 
+        // Consume the body even with Prefer: return=minimal — an unread body
+        // keeps the undici socket out of the connection pool.
+        await response.text().catch(() => {});
+
         if (!response.ok) {
           return {
             attempted: true,
