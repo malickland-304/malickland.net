@@ -29,6 +29,9 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 - [x] Required Gmail env vars (`GMAIL_USER`, `GMAIL_APP_PASSWORD`) present in the deploy environment
       (names only — never commit secrets).
 - [ ] Consent line present on the form.
+- [ ] (Recommended) Durable lead backup active: `supabase/migrations/0001_contact_leads_backup.sql`
+      applied and `LEAD_BACKUP_SUPABASE_URL`/`LEAD_BACKUP_SUPABASE_KEY` set in the deploy
+      environment; a test lead appears in `contact_leads`. See `GO_LIVE_RUNBOOK.md` Step 3.
 - [ ] (Recommended) Basic abuse/rate-limit control in place or the gap explicitly accepted for launch
       (see `TASKS.md` "Add durable contact abuse protection").
 

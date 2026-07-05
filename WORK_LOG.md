@@ -125,6 +125,23 @@ Rebase PR #17 onto current `main`, preserve the launch decision that public list
 - No production deploy, Vercel setting, Cloudflare route, DNS, or secret/env change was performed.
 - Worker-specific tests for lead abuse controls, field validation, and remaining HTML/script XSS contexts still need to be added before enabling the listing subsystem.
 - Owner-side production cutover remains governed by `LAUNCH_CHECKLIST.md` section F.
+## 2026-06-28 — Durable lead backup + go-live runbook (agent)
+
+- Added env-gated Supabase lead backup to `/api/contact`: `leadStore.ts` (plain-fetch PostgREST,
+  3s timeout, no new deps), wired into `handler.ts` on all three delivery paths (success,
+  mail-failure, mail-unconfigured). User-facing responses unchanged.
+- New migration `supabase/migrations/0001_contact_leads_backup.sql` (RLS, insert-only for
+  publishable key, size CHECKs). Supabase project `kwhffzvoflplumrarcbh` was un-paused; applying
+  the migration via MCP hit repeated tool-approval stream failures in this environment, so the
+  migration is committed for owner one-paste apply (unverified on the live database — labeled per
+  AGENTS.md truthfulness rule).
+- Added `GO_LIVE_RUNBOOK.md`: ordered owner-only launch steps (verify Vercel serves → verify lead
+  email end-to-end → activate backup → DNS cutover → declare launch + weekly backup glance).
+- Verification actually run: `npm run test:contact` 23/23 pass (incl. 4 new handler-path tests and
+  4 new leadStore tests); `tsc --noEmit` clean; `npm audit --omit=dev` 0 vulnerabilities;
+  production build pass (earlier this session on identical deps); scoped lint run recorded in PR.
+- Governance docs updated: DECISIONS, SECURITY, TASKS, PROJECT_STATE, LAUNCH_CHECKLIST, .env.example.
+
 
 ## 2026-06-23 - Codex Pin Vercel Framework Preset
 

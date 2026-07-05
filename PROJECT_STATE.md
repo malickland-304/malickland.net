@@ -4,6 +4,11 @@ Last updated: 2026-06-28
 
 ## Implemented
 
+- Durable lead backup (2026-06-28): `/api/contact` persists every validated submission to Supabase
+  `contact_leads` with delivery status when `LEAD_BACKUP_*` env vars are set (insert-only RLS,
+  publishable key, no new dependencies). No-op when unset. `GO_LIVE_RUNBOOK.md` sequences the
+  remaining owner-only launch steps. Live-database migration apply is pending owner action.
+
 - Public Next.js marketing website with homepage, listings, about, contact, shared navigation, and footer.
 - Contact form UI posts to `/api/contact`.
 - `/api/contact` rate-limits requests before parsing/sending mail, validates JSON payloads, trims and length-limits fields, validates email shape, preserves service-interest and timeline fields, checks Gmail env configuration, and sends email through Gmail via Nodemailer environment variables.

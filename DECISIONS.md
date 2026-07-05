@@ -13,6 +13,44 @@ Alternatives considered: server-side cookies, URL propagation through every inte
 Security/performance impact: No secrets or personal data are stored. Only campaign/path/referrer metadata is stored client-side for the current tab session. If storage fails, the form falls back to current URL attribution and still submits.
 
 Files affected: `src/lib/attribution.ts`, `src/components/AttributionTracker.tsx`, `src/app/layout.tsx`, `src/app/contact/ContactForm.tsx`, `TASKS.md`, `WORK_LOG.md`.
+## 2026-06-28 - Add Durable Supabase Lead Backup To /api/contact
+
+Problem: The lead-safety gate (`LAUNCH_CHECKLIST.md` §B, "No lead silently drops") was only
+partially met. If the Gmail send fails or `GMAIL_USER`/`GMAIL_APP_PASSWORD` are misconfigured —
+the exact state production has been in during the recent env-var debugging — the user sees an
+error, but the lead itself is gone. For a real-estate agency each dropped lead is a potentially
+lost commission.
+
+Decision: Add an optional, env-gated durable backup: every validated contact submission is also
+written to a Supabase `contact_leads` table (`supabase/migrations/0001_contact_leads_backup.sql`)
+via PostgREST over plain `fetch` — no new dependencies. Activated only when
+`LEAD_BACKUP_SUPABASE_URL` + `LEAD_BACKUP_SUPABASE_KEY` are set; otherwise a no-op. User-facing
+response semantics are unchanged (mail failure still shows an error; no false success). The table
+is insert-only for the publishable key under RLS (no read/update/delete), with size CHECK
+constraints mirroring the app's field limits. On the double-failure path (mail failed AND backup
+unavailable), the sanitized lead is logged to server logs as a last-resort recovery channel.
+
+Reasoning: Email remains primary; the store is pure additive insurance. Using the publishable
+(non-secret) key + insert-only RLS keeps owner setup to two low-sensitivity env vars and avoids
+handling the service-role secret. The current implementation was failing a documented requirement,
+which is the governance bar for touching database strategy.
+
+Alternatives considered: (1) service-role key — rejected: secret handling burden for no added
+capability here; (2) third-party form service — rejected: new vendor + dependency; (3) log-only
+backup — rejected: Vercel log retention is too short to be durable.
+
+Security/performance impact: PII (name/email/phone/message) now persists in Supabase — documented
+in `SECURITY.md`; table unreadable with the shipped key. Direct-to-table spam is possible with the
+public key but bounded (insert-only, size-capped, unreadable); mitigation path documented. Adds
+one timeout-bounded (3s default) fetch per submission.
+
+Rollback: unset the two env vars (store becomes a no-op); optionally `drop table contact_leads`.
+
+Files affected: `src/app/api/contact/leadStore.ts` (new), `src/app/api/contact/handler.ts`,
+`src/app/api/contact/leadStore.test.ts` (new), `src/app/api/contact/route.test.ts`,
+`supabase/migrations/0001_contact_leads_backup.sql` (new), `package.json`, `.env.example`,
+`GO_LIVE_RUNBOOK.md` (new), `SECURITY.md`, `TASKS.md`, `PROJECT_STATE.md`, `LAUNCH_CHECKLIST.md`,
+`WORK_LOG.md`.
 
 ## 2026-06-22 - Defer Public Listings Feed For Launch
 

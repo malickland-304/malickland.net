@@ -1,5 +1,11 @@
 import nodemailer from "nodemailer";
 import {
+  createLeadStore,
+  type LeadDeliveryStatus,
+  type LeadStore,
+  type LeadStoreResult,
+} from "./leadStore.ts";
+import {
   buildContactSubject,
   type ContactSubmission,
   formatContactEmail,
@@ -26,6 +32,7 @@ type ContactPostDeps = {
   getGmailConfig?: () => GmailConfig | null;
   rateLimiter?: RateLimiter;
   sendMail?: (config: GmailConfig, data: ContactSubmission) => Promise<void>;
+  leadStore?: LeadStore;
 };
 
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 5;
@@ -207,6 +214,52 @@ function createRateLimiter(): RateLimiter {
   return createMemoryRateLimiter();
 }
 
+// Backup persistence is best-effort and must never change user-facing response
+// semantics (lead-safety gate). It exists so a mail failure or misconfiguration
+// can never silently lose a lead: the submission lands in the backup store with
+// its delivery status, and operators are alerted loudly via structured logs.
+async function persistLeadBackup(
+  leadStore: LeadStore,
+  data: ContactSubmission,
+  delivery: LeadDeliveryStatus
+): Promise<LeadStoreResult> {
+  let result: LeadStoreResult;
+  try {
+    result = await leadStore.persist(data, delivery);
+  } catch (err) {
+    result = {
+      attempted: true,
+      stored: false,
+      error: err instanceof Error ? err.message : "Unknown error",
+    };
+  }
+
+  if (!delivery.emailDelivered) {
+    if (result.attempted && result.stored) {
+      console.error("Contact lead email failed; lead PRESERVED in backup store.", {
+        emailError: delivery.emailError,
+      });
+    } else {
+      console.error(
+        "Contact lead email failed and backup store did not capture it. " +
+          "Lead details follow so it can be recovered from logs.",
+        {
+          emailError: delivery.emailError,
+          backupAttempted: result.attempted,
+          backupError: result.attempted ? result.error : "backup not configured",
+          lead: data,
+        }
+      );
+    }
+  } else if (result.attempted && !result.stored) {
+    console.error("Contact lead emailed OK but backup store insert failed.", {
+      backupError: result.error,
+    });
+  }
+
+  return result;
+}
+
 async function sendContactEmail(config: GmailConfig, data: ContactSubmission) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -285,9 +338,15 @@ export async function handleContactPost(req: Request, deps: ContactPostDeps = {}
     );
   }
 
+  const leadStore = deps.leadStore || createLeadStore();
+
   const gmail = (deps.getGmailConfig || getGmailConfig)();
   if (!gmail) {
     console.error("Contact form mail is not configured.");
+    await persistLeadBackup(leadStore, validation.data, {
+      emailDelivered: false,
+      emailError: "mail_not_configured",
+    });
     return Response.json(
       {
         error:
@@ -300,10 +359,18 @@ export async function handleContactPost(req: Request, deps: ContactPostDeps = {}
   try {
     await (deps.sendMail || sendContactEmail)(gmail, validation.data);
 
+    await persistLeadBackup(leadStore, validation.data, {
+      emailDelivered: true,
+    });
+
     return Response.json({ success: true });
   } catch (err) {
     console.error("Contact form mail send failed:", {
       message: err instanceof Error ? err.message : "Unknown error",
+    });
+    await persistLeadBackup(leadStore, validation.data, {
+      emailDelivered: false,
+      emailError: err instanceof Error ? err.message : "Unknown error",
     });
     return Response.json(
       {
