@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { handleContactPost } from "./handler.ts";
+import { handleContactPost, type MailConfig } from "./handler.ts";
 import type { ContactSubmission } from "./validation.ts";
+
+const testMailConfig: MailConfig = {
+  apiKey: "test-key",
+  from: "MalickLand Contact Form <contact@malickland.net>",
+  to: "leads@example.com",
+  timeoutMs: 5000,
+};
 
 const validPayload = {
   firstName: "Phil",
@@ -27,7 +34,7 @@ test("handleContactPost sends allowed valid submissions", async () => {
   const sent: ContactSubmission[] = [];
 
   const response = await handleContactPost(contactRequest(validPayload), {
-    getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+    getMailConfig: () => testMailConfig,
     rateLimiter: {
       async check() {
         return { allowed: true, limit: 5, remaining: 4 };
@@ -48,7 +55,7 @@ test("handleContactPost rate-limits before mail send", async () => {
   let sendCount = 0;
 
   const response = await handleContactPost(contactRequest(validPayload), {
-    getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+    getMailConfig: () => testMailConfig,
     rateLimiter: {
       async check() {
         return {
@@ -83,8 +90,8 @@ test("handleContactPost uses trusted proxy IP before spoofable forwarded-for", a
   const sent: ContactSubmission[] = [];
   const cfIp = `198.51.100.${Math.floor(Math.random() * 100) + 1}`;
   const deps = {
-    getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
-    async sendMail(_config: { user: string; pass: string }, data: ContactSubmission) {
+    getMailConfig: () => testMailConfig,
+    async sendMail(_config: MailConfig, data: ContactSubmission) {
       sent.push(data);
     },
   };
@@ -150,7 +157,7 @@ test("handleContactPost fails closed when rate-limit checks fail", async () => {
 
   try {
     const response = await handleContactPost(contactRequest(validPayload), {
-      getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+      getMailConfig: () => testMailConfig,
       rateLimiter: {
         async check() {
           throw new Error("rate-limit backend unavailable");
@@ -193,7 +200,7 @@ test("handleContactPost fails closed when Redis rate-limit request times out", a
 
   try {
     const response = await handleContactPost(contactRequest(validPayload), {
-      getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+      getMailConfig: () => testMailConfig,
       async sendMail() {
         sendCount += 1;
       },
@@ -257,7 +264,7 @@ test("lead backup records delivered leads without changing the success response"
   const backup = stubLeadStore();
 
   const response = await handleContactPost(contactRequest(validPayload), {
-    getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+    getMailConfig: () => testMailConfig,
     rateLimiter: allowAllRateLimiter,
     async sendMail() {},
     leadStore: backup.store,
@@ -277,7 +284,7 @@ test("lead backup captures the lead when mail send fails; error response unchang
 
   try {
     const response = await handleContactPost(contactRequest(validPayload), {
-      getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+      getMailConfig: () => testMailConfig,
       rateLimiter: allowAllRateLimiter,
       async sendMail() {
         throw new Error("SMTP unavailable");
@@ -304,7 +311,7 @@ test("lead backup captures the lead when mail is not configured; 503 unchanged",
 
   try {
     const response = await handleContactPost(contactRequest(validPayload), {
-      getGmailConfig: () => null,
+      getMailConfig: () => null,
       rateLimiter: allowAllRateLimiter,
       leadStore: backup.store,
     });
@@ -324,7 +331,7 @@ test("a throwing lead store never breaks the user response", async () => {
 
   try {
     const response = await handleContactPost(contactRequest(validPayload), {
-      getGmailConfig: () => ({ user: "leads@example.com", pass: "app-password" }),
+      getMailConfig: () => testMailConfig,
       rateLimiter: allowAllRateLimiter,
       async sendMail() {},
       leadStore: {
@@ -338,5 +345,122 @@ test("a throwing lead store never breaks the user response", async () => {
     assert.deepEqual(await response.json(), { success: true });
   } finally {
     console.error = originalConsoleError;
+  }
+});
+
+// ── Resend transport (real getMailConfig + sendContactEmail over fetch) ───────
+
+function withResendEnv(apiKey: string | null) {
+  const previous = {
+    key: process.env.RESEND_API_KEY,
+    from: process.env.CONTACT_EMAIL_FROM,
+    to: process.env.CONTACT_EMAIL_TO,
+  };
+  delete process.env.CONTACT_EMAIL_FROM;
+  delete process.env.CONTACT_EMAIL_TO;
+  if (apiKey == null) delete process.env.RESEND_API_KEY;
+  else process.env.RESEND_API_KEY = apiKey;
+
+  return function restore() {
+    for (const [name, value] of [
+      ["RESEND_API_KEY", previous.key],
+      ["CONTACT_EMAIL_FROM", previous.from],
+      ["CONTACT_EMAIL_TO", previous.to],
+    ] as const) {
+      if (value == null) delete process.env[name];
+      else process.env[name] = value;
+    }
+  };
+}
+
+test("delivers via Resend when RESEND_API_KEY is configured", async () => {
+  const restoreEnv = withResendEnv("re_test_key");
+  const originalFetch = globalThis.fetch;
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    calls.push({ url: String(input), init });
+    return new Response(JSON.stringify({ id: "email_123" }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  }) as typeof fetch;
+
+  const backup = stubLeadStore();
+  try {
+    const response = await handleContactPost(contactRequest(validPayload), {
+      rateLimiter: allowAllRateLimiter,
+      leadStore: backup.store,
+    });
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { success: true });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "https://api.resend.com/emails");
+    const headers = calls[0].init?.headers as Record<string, string>;
+    assert.equal(headers.Authorization, "Bearer re_test_key");
+    const payload = JSON.parse(String(calls[0].init?.body));
+    assert.equal(payload.reply_to, "phil@example.com");
+    assert.deepEqual(payload.to, ["phil@malickland.net"]);
+    assert.equal(backup.calls[0].delivery.emailDelivered, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+    restoreEnv();
+  }
+});
+
+test("Resend failure yields 500 and preserves the lead in backup", async () => {
+  const restoreEnv = withResendEnv("re_test_key");
+  const originalFetch = globalThis.fetch;
+  const originalConsoleError = console.error;
+  console.error = () => {};
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ message: "domain not verified" }), {
+      status: 403,
+      headers: { "content-type": "application/json" },
+    })) as typeof fetch;
+
+  const backup = stubLeadStore();
+  try {
+    const response = await handleContactPost(contactRequest(validPayload), {
+      rateLimiter: allowAllRateLimiter,
+      leadStore: backup.store,
+    });
+
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), {
+      error: "Failed to send message. Please try calling or emailing directly.",
+    });
+    assert.equal(backup.calls.length, 1);
+    assert.equal(backup.calls[0].delivery.emailDelivered, false);
+    assert.match(
+      String(backup.calls[0].delivery.emailError),
+      /Resend send failed with status 403/
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
+    restoreEnv();
+  }
+});
+
+test("missing RESEND_API_KEY is treated as mail-not-configured (503)", async () => {
+  const restoreEnv = withResendEnv(null);
+  const originalConsoleError = console.error;
+  console.error = () => {};
+
+  const backup = stubLeadStore();
+  try {
+    const response = await handleContactPost(contactRequest(validPayload), {
+      rateLimiter: allowAllRateLimiter,
+      leadStore: backup.store,
+    });
+
+    assert.equal(response.status, 503);
+    assert.equal(backup.calls.length, 1);
+    assert.equal(backup.calls[0].delivery.emailDelivered, false);
+    assert.equal(backup.calls[0].delivery.emailError, "mail_not_configured");
+  } finally {
+    console.error = originalConsoleError;
+    restoreEnv();
   }
 });

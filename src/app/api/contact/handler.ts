@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import {
   createLeadStore,
   type LeadDeliveryStatus,
@@ -12,9 +11,11 @@ import {
   validateContactPayload,
 } from "./validation.ts";
 
-type GmailConfig = {
-  user: string;
-  pass: string;
+export type MailConfig = {
+  apiKey: string;
+  from: string;
+  to: string;
+  timeoutMs: number;
 };
 
 type RateLimitResult = {
@@ -29,9 +30,9 @@ type RateLimiter = {
 };
 
 type ContactPostDeps = {
-  getGmailConfig?: () => GmailConfig | null;
+  getMailConfig?: () => MailConfig | null;
   rateLimiter?: RateLimiter;
-  sendMail?: (config: GmailConfig, data: ContactSubmission) => Promise<void>;
+  sendMail?: (config: MailConfig, data: ContactSubmission) => Promise<void>;
   leadStore?: LeadStore;
 };
 
@@ -61,12 +62,29 @@ const maybeUnrefInterval = memoryRateLimitSweepInterval as ReturnType<
 };
 maybeUnrefInterval.unref?.();
 
-function getGmailConfig() {
-  const user = process.env.GMAIL_USER?.trim();
-  const pass = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, "");
+// Resend transactional email. The API key is the only required secret; the
+// from-address must be on a Resend-verified domain (malickland.net) and the
+// recipient defaults to Phil's inbox. A missing key means mail is "not
+// configured" and the handler fails closed (503) while the lead still lands in
+// the backup store (lead-safety gate). This replaces the prior Gmail/SMTP
+// app-password path, which was fragile — app passwords are account-bound and
+// silently revocable, and had failed in production with 535 BadCredentials.
+const DEFAULT_CONTACT_EMAIL_FROM = "MalickLand Contact Form <contact@malickland.net>";
+const DEFAULT_CONTACT_EMAIL_TO = "phil@malickland.net";
+const DEFAULT_MAIL_TIMEOUT_MS = 5000;
 
-  if (!user || !pass) return null;
-  return { user, pass };
+function getMailConfig(): MailConfig | null {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const from = process.env.CONTACT_EMAIL_FROM?.trim() || DEFAULT_CONTACT_EMAIL_FROM;
+  const to = process.env.CONTACT_EMAIL_TO?.trim() || DEFAULT_CONTACT_EMAIL_TO;
+  const timeoutMs = numberFromEnv(
+    "CONTACT_EMAIL_TIMEOUT_MS",
+    DEFAULT_MAIL_TIMEOUT_MS
+  );
+
+  return { apiKey, from, to, timeoutMs };
 }
 
 function numberFromEnv(name: string, fallback: number) {
@@ -260,24 +278,43 @@ async function persistLeadBackup(
   return result;
 }
 
-async function sendContactEmail(config: GmailConfig, data: ContactSubmission) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-  });
-
+async function sendContactEmail(config: MailConfig, data: ContactSubmission) {
   const emailBody = formatContactEmail(data, new Date().toISOString());
 
-  await transporter.sendMail({
-    from: `"MalickLand Contact Form" <${config.user}>`,
-    to: config.user,
-    replyTo: data.email,
-    subject: buildContactSubject(data),
-    text: emailBody,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), config.timeoutMs);
+
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        from: config.from,
+        to: [config.to],
+        reply_to: data.email,
+        subject: buildContactSubject(data),
+        text: emailBody,
+      }),
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  // Read the body regardless of status: on failure it carries Resend's error
+  // detail (surfaced to logs + the backup store); on success it releases the
+  // undici socket back to the connection pool.
+  const responseText = await response.text().catch(() => "");
+
+  if (!response.ok) {
+    throw new Error(
+      `Resend send failed with status ${response.status}: ${responseText.slice(0, 200)}`
+    );
+  }
 }
 
 export async function handleContactPost(req: Request, deps: ContactPostDeps = {}) {
@@ -340,8 +377,8 @@ export async function handleContactPost(req: Request, deps: ContactPostDeps = {}
 
   const leadStore = deps.leadStore || createLeadStore();
 
-  const gmail = (deps.getGmailConfig || getGmailConfig)();
-  if (!gmail) {
+  const mail = (deps.getMailConfig || getMailConfig)();
+  if (!mail) {
     console.error("Contact form mail is not configured.");
     await persistLeadBackup(leadStore, validation.data, {
       emailDelivered: false,
@@ -357,7 +394,7 @@ export async function handleContactPost(req: Request, deps: ContactPostDeps = {}
   }
 
   try {
-    await (deps.sendMail || sendContactEmail)(gmail, validation.data);
+    await (deps.sendMail || sendContactEmail)(mail, validation.data);
 
     await persistLeadBackup(leadStore, validation.data, {
       emailDelivered: true,
