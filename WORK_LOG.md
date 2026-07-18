@@ -1,5 +1,43 @@
 # Malickland 2.0 Work Log
 
+## 2026-07-18 — Claude (Phase 0 pre-publication security audit, read-only)
+
+### Objective
+
+Run the plan's Prompt 1 read-only credential audit and record findings before any
+publication step, per the security-first gate.
+
+### Changes Made
+
+- Added `SECURITY_AUDIT.md` (Phase 0 audit report). No application, dependency, or
+  security-policy files were modified in this pass.
+
+### Verification
+
+- Secret scan across `malickland.net`, `openclaw-system`, `openclaw` (both `main`
+  and the feature branch, plus full history for ever-added `.env`): no committed
+  secrets. `malickland.net` has only `.env.example`; the sole `openclaw` matches are
+  fake test fixtures. Full details and method in `SECURITY_AUDIT.md` §1.
+- Confirmed the contact form uses Resend in code (`src/app/api/contact/handler.ts:77,289`),
+  not Gmail/SMTP; verified secrets are read server-side via `process.env.*` only.
+- Verified go-live docs still reference the removed Gmail path (`GO_LIVE_RUNBOOK.md:38-39`,
+  `LAUNCH_CHECKLIST.md:29,90,93`, `README.md:75-76`, `ARCHITECTURE.md:21`, `SECURITY.md`).
+
+### Remaining Risks
+
+- Phase 0 is NOT cleared: the leaked Hostinger token lives outside git (hPanel +
+  local shell history). Owner must revoke + scrub manually; this audit cannot see it.
+- F1 (HIGH): Gmail→Resend doc drift would misconfigure the contact form at go-live
+  (launcher told to set `GMAIL_APP_PASSWORD`, never told to set `RESEND_API_KEY`).
+- F2/F3 (MED/LOW): no HTTP security headers; `images.remotePatterns` allows any host.
+- `SECURITY.md` §"Current Immediate Risks" items (Worker CORS `*`, localStorage token,
+  Apps Script "Anyone", KV IP retention, dep-advisory recheck) were NOT re-verified here.
+
+### Recommended Next Task
+
+Owner completes the Hostinger token revocation, then remediate F1 (Gmail→Resend doc
+drift) before any go-live rehearsal. See `SECURITY_AUDIT.md` §5.
+
 ## 2026-06-28 - Codex Worker Hardening Tests
 
 ### Objective
