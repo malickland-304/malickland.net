@@ -1,5 +1,29 @@
 # Malickland 2.0 Work Log
 
+## 2026-09-29 - Next.js Security Bump (16.2.6 -> 16.3.7)
+
+### Objective
+
+Clear the two open critical Dependabot alerts on `next` (vulnerable range >= 16.0.0, < 16.3.3; patched 16.3.3). Dependabot PR #26 only targets 16.2.12, which is still inside the vulnerable range.
+
+### Changes Made
+
+- `next` and `eslint-config-next` bumped to `^16.3.7` (lockfile resolves `next@16.3.7`). No application code changed.
+
+### Verification
+
+- `npm run lint` -> no errors reported.
+- `tsc --noEmit` -> no errors.
+- `npm run test:contact` -> 26/26 pass. `npm run test:worker` -> 7/7 pass.
+- `npm run build` -> completed.
+- `npm run test:public-pages` -> all routes returned expected status.
+- Not verified: Vercel preview deployment behavior and production runtime.
+
+### Remaining Risks
+
+- `npm audit --omit=dev` still reports transitive `postcss` (high), `nanoid` (high), `baseline-browser-mapping` (moderate); each has a lockfile fix available. Left out of this PR to keep it scoped; follow-up recommended.
+- Merging does not deploy by itself unless Vercel auto-deploys `main`; confirm the production deployment and its Next version afterwards.
+
 ## 2026-06-28 - Codex Worker Hardening Tests
 
 ### Objective
