@@ -32,6 +32,7 @@ Last updated: 2026-06-28
 
 - `npm audit --omit=dev` on 2026-05-27 initially found production advisories in `next@16.1.6`, transitive `postcss`, and `nodemailer@8.0.3`.
 - Dependency manifests now target `next@^16.2.6`, `eslint-config-next@^16.2.6`, `nodemailer@^9.0.1`, `@types/nodemailer@^8.0.1`, and override `postcss@^8.5.10`; `npm audit --omit=dev --json` and full `npm audit --json` reported 0 vulnerabilities on 2026-06-19.
+- 2026-09-29: `next` was found at 16.2.6 in production (Vercel `ef920d4`) with two open critical advisories. PR #27 targets `next@^16.3.7` and refreshes transitive `postcss`, `nanoid`, `browserslist`, `js-yaml`, `brace-expansion` and `baseline-browser-mapping`; `npm audit` reports 0 vulnerabilities on the PR branch. Open gate: merge #27, then confirm the production deployment serves the new build. The 2026-05-27 lines above are historical.
 - The main mirrored checkout build/dev hang was resolved on 2026-06-07. Cause: backup dependency trees named like `node_modules.codex-backup-*` were inside the repo and were scanned by Tailwind/PostCSS and TypeScript. `.gitignore` and `tsconfig.json` now exclude `*.codex-backup-*`, and the real checkout passes production build and starts `next dev`.
 - The default `npm run lint` script is scoped to `src next.config.ts eslint.config.mjs` and passes in the main checkout.
 - `/api/contact` has a Redis REST rate-limit implementation for durable production use and an in-memory fallback for local/single-process development. Production still needs the Redis REST env values configured before deployment.

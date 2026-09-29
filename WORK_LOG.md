@@ -8,21 +8,22 @@ Clear the two open critical Dependabot alerts on `next` (vulnerable range >= 16.
 
 ### Changes Made
 
-- `next` and `eslint-config-next` bumped to `^16.3.7` (lockfile resolves `next@16.3.7`). No application code changed.
+- `next` and `eslint-config-next` bumped to `^16.3.7` (lockfile resolves `next@16.3.7`); sharp resolved 0.34.5 -> 0.35.5 as a side effect.
+- `npm audit fix` (lockfile only, `package.json` untouched): patch/minor bumps of `postcss` 8.5.28, `nanoid` 3.3.19, `baseline-browser-mapping` 2.11.26, `browserslist`, `js-yaml`, `brace-expansion`, `@humanfs/*`, `caniuse-lite`, `electron-to-chromium`, `node-releases`, `update-browserslist-db`.
+- Refreshed current-state records: `SECURITY.md`, `PROJECT_STATE.md`, `TASKS.md` (open task to ship this PR). Historical May/June audit lines kept as dated evidence.
+- No application code changed.
 
-### Verification
+### Verification (run in this session)
 
-- `npm run lint` -> no errors reported.
-- `tsc --noEmit` -> no errors.
-- `npm run test:contact` -> 26/26 pass. `npm run test:worker` -> 7/7 pass.
-- `npm run build` -> completed.
-- `npm run test:public-pages` -> all routes returned expected status.
-- Not verified: Vercel preview deployment behavior and production runtime.
+- `npm run lint`: no errors or warnings. `tsc --noEmit`: exit 0.
+- `npm run test:contact`: 26/26 pass. `npm run test:worker`: 7/7 pass.
+- `npm run build`: exit 0. `npm run test:public-pages`: exit 0.
+- `npm audit` and `npm audit --omit=dev`: 0 vulnerabilities.
+- Not verified: Vercel preview beyond `/` and `/services`, production runtime, image optimization behavior.
 
 ### Remaining Risks
 
-- `npm audit --omit=dev` still reports transitive `postcss` (high), `nanoid` (high), `baseline-browser-mapping` (moderate); each has a lockfile fix available. Left out of this PR to keep it scoped; follow-up recommended.
-- Merging does not deploy by itself unless Vercel auto-deploys `main`; confirm the production deployment and its Next version afterwards.
+- Merging does not by itself prove production is patched; confirm the production deployment and its lockfile afterwards.
 
 ## 2026-06-28 - Codex Worker Hardening Tests
 
