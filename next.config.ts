@@ -28,6 +28,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Prevent next dev from modifying repository-governed AGENTS.md
+  agentRules: false,
   // Remote image patterns are restricted to prevent open-proxy / SSRF abuse.
   // Add specific domain patterns here only when an external image provider is verified.
   images: {
