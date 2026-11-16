@@ -107,6 +107,8 @@ export function Nav() {
           className="md:hidden p-2 text-green-100 hover:text-white"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="mobile-nav-menu"
         >
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -114,7 +116,7 @@ export function Nav() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-[#142814] border-t border-[#254E25]">
+        <div id="mobile-nav-menu" className="md:hidden bg-[#142814] border-t border-[#254E25]">
           <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-3">
             {links.map((l) => (
               <Link
@@ -126,6 +128,23 @@ export function Nav() {
                 {l.label}
               </Link>
             ))}
+            <div className="pt-2 flex flex-col gap-3">
+              <Link
+                href="/contact"
+                className="bg-[#C4A040] hover:bg-[#D4B050] text-white px-4 py-2.5 rounded text-center text-sm font-semibold transition-colors"
+                onClick={() => setOpen(false)}
+              >
+                Get Started
+              </Link>
+              <a
+                href="tel:15402461421"
+                className="flex items-center justify-center gap-1.5 py-2 text-sm text-[#D4B050] hover:text-white transition-colors"
+                onClick={() => setOpen(false)}
+              >
+                <Phone className="w-3.5 h-3.5" />
+                (540) 246-1421
+              </a>
+            </div>
           </div>
         </div>
       )}

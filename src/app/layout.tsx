@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { AttributionTracker } from "@/components/AttributionTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://malickland.net"),
   title: {
     default: "MalickLand | WV Real Estate Agency",
     template: "%s | MalickLand",
@@ -29,11 +31,11 @@ export const metadata: Metadata = {
     "MalickLand",
     "WV homes for sale",
     "Eastern Panhandle real estate",
-    "Romney WV realtor",
+    "Romney WV real estate agent",
     "Berkeley County homes",
     "Jefferson County WV",
     "Hampshire County real estate",
-    "Phil Malick realtor",
+    "Phil Malick real estate agent",
   ],
   authors: [{ name: "Phil Malick" }],
   creator: "MalickLand — WV Real Estate Agency",
@@ -45,6 +47,21 @@ export const metadata: Metadata = {
     title: "MalickLand | WV Real Estate Agency",
     description:
       "MalickLand — WV Real Estate Agency. Eastern Panhandle specialists. Buy, sell, or invest with Phil Malick.",
+    images: [
+      {
+        url: "/phil-headshot.jpg",
+        width: 1200,
+        height: 1200,
+        alt: "Phil Malick — WV Licensed Real Estate Agent",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MalickLand | WV Real Estate Agency",
+    description:
+      "MalickLand — WV Real Estate Agency. Eastern Panhandle specialists. Buy, sell, or invest with Phil Malick.",
+    images: ["/phil-headshot.jpg"],
   },
   icons: {
     icon: "/favicon.svg",
@@ -57,8 +74,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { AttributionTracker } from "@/components/AttributionTracker";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -67,7 +82,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col font-sans`}
       >
         <AttributionTracker />
         <Nav />

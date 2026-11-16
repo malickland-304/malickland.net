@@ -81,7 +81,7 @@ export default {
 
     } catch (err) {
       console.error(err);
-      return new Response(`Internal error: ${err.message}`, { status: 500, headers: corsHeaders });
+      return new Response('Internal error', { status: 500, headers: corsHeaders });
     }
 
     return render404(request);

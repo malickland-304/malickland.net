@@ -47,6 +47,16 @@ const pageChecks = [
     includes: ["MEDjAi Seller Readiness Checkup", "informational market research only"],
   },
   {
+    path: "/robots.txt",
+    status: 200,
+    includes: ["User-Agent: *", "Disallow: /api/"],
+  },
+  {
+    path: "/sitemap.xml",
+    status: 200,
+    includes: ["https://malickland.net", "https://malickland.net/services"],
+  },
+  {
     path: "/api/contact",
     status: 405,
     includes: [],

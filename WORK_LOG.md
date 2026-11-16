@@ -1,5 +1,54 @@
 # Malickland 2.0 Work Log
 
+## 2026-11-16 - Comprehensive Security, Compliance, SEO, and Operational Hardening
+
+### Objective
+
+Perform an exhaustive analysis of the `malickland.net` project across security, legal compliance, functionality, SEO, accessibility, and documentation, and implement fixes for all identified defects.
+
+### Changes Made
+
+- **Security & Dependency Vulnerabilities**:
+  - Upgraded `next` and `eslint-config-next` to `^16.4.6` in `package.json` and lockfile.
+  - Added dependency overrides for `source-map-js@^1.2.2` and `minimatch@^11.0.1`.
+  - Audited dependencies: `npm audit --omit=dev` and full `npm audit` both report 0 vulnerabilities (exit code 0).
+  - Removed wildcard `hostname: "**"` in `next.config.ts` remotePatterns to close Next.js Image Optimization SSRF and open proxy vulnerabilities.
+  - Configured standard security headers in `next.config.ts` (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`, `X-DNS-Prefetch-Control`).
+  - Sanitized uncaught HTTP 500 error responses in `listing-system/workers/worker.js` to avoid leaking error messages or stack traces to clients.
+  - Added honeypot spam protection (`hp_email`) to `src/app/contact/ContactForm.tsx`.
+- **Compliance & Legal Trademark Protection**:
+  - Replaced unlicensed references to "realtor" in `src/app/page.tsx`, `src/app/about/page.tsx`, and `src/app/layout.tsx` with "real estate agent", satisfying strict NAR trademark requirements and `src/lib/compliance.ts`.
+- **SEO & Discoverability**:
+  - Implemented `src/app/robots.ts` serving valid `robots.txt` disallowing `/api/`.
+  - Implemented `src/app/sitemap.ts` dynamically providing full canonical URL mapping for core and service-offer routes.
+  - Added Schema.org `RealEstateAgent` JSON-LD structured data to the homepage (`src/app/page.tsx`).
+  - Added `metadataBase`, OpenGraph image details, and Twitter card metadata in `src/app/layout.tsx`.
+- **UX & Accessibility**:
+  - Added "Get Started" CTA button and direct phone link to the mobile drawer menu in `src/components/nav.tsx`.
+  - Added `aria-expanded` and `aria-controls` accessibility attributes to mobile toggle in `src/components/nav.tsx`.
+  - Added `role="status"` and `role="alert"` live region announcements to `ContactForm.tsx`.
+- **Design & Typography Alignment**:
+  - Updated `src/app/globals.css` with authoritative brand colors (`--brand-forest`, `--brand-gold`, etc.) and set `body` font family to `var(--font-sans)` with fallback chain so the loaded Geist font is utilized.
+  - Updated `README.md` brand colors table.
+- **Operational Documentation & Runbook Fixes**:
+  - Reconciled `README.md`, `GO_LIVE_RUNBOOK.md`, `SECURITY.md`, and `LAUNCH_CHECKLIST.md` to document the active Resend (`RESEND_API_KEY`) and Supabase backup configuration, fixing critical documentation drift where operators were guided to configure decommissioned Gmail credentials.
+  - Scoped route patterns in `listing-system/workers/wrangler.toml` to prevent worker route collisions from intercepting `/api/contact`.
+
+### Verification (run in this session)
+
+- `npm run lint`: pass (0 errors, 0 warnings).
+- `npx tsc --noEmit`: pass (exit 0).
+- `npm run test:contact`: 26/26 pass.
+- `npm run test:worker`: 7/7 pass.
+- `npm run build`: pass (Next.js 16.4.6 Turbopack production build succeeded; generates static robots.txt and sitemap.xml).
+- `npm run test:public-pages`: pass (all routes including /robots.txt, /sitemap.xml, and /api/contact 405 smoke tested on production server).
+- `npm audit --omit=dev`: 0 vulnerabilities found.
+- Full `npm audit`: 0 vulnerabilities found.
+
+### Remaining Risks
+
+- Owner-side go-live steps remain: applying Supabase migration, adding `RESEND_API_KEY` (and optional `LEAD_BACKUP_*` / `CONTACT_RATE_LIMIT_*`) to Vercel production environment, and performing DNS cutover as sequenced in `GO_LIVE_RUNBOOK.md`.
+
 ## 2026-09-29 - Next.js Security Bump (16.2.6 -> 16.3.7)
 
 ### Objective

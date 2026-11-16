@@ -267,7 +267,7 @@ export default function AboutPage() {
                   ))}
                 </div>
                 <p className="text-slate-200 text-sm leading-relaxed italic mb-4">
-                  &ldquo;Phil is the best realtor in Hampshire County. He knew
+                  &ldquo;Phil is the best real estate agent in Hampshire County. He knew
                   every detail about every property we looked at. If you
                   need a WV agent who actually knows the market, call
                   Phil.&rdquo;

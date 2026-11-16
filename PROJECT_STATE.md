@@ -1,8 +1,17 @@
 # Malickland 2.0 Project State
 
-Last updated: 2026-06-28
+Last updated: 2026-11-16
 
 ## Implemented
+
+- Complete Security, Compliance & SEO Audit Remediation (2026-11-16):
+  - Dependencies: Bumped `next` and `eslint-config-next` to `^16.4.6`, added overrides for `source-map-js@^1.2.2` and `minimatch@^11.0.1`. Both `npm audit --omit=dev` and full `npm audit` report 0 vulnerabilities (exit 0).
+  - Security: Removed wildcard image remote pattern (`hostname: "**"`) in `next.config.ts` to prevent SSRF and image optimization abuse. Added HTTP security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`). Sanitized uncaught HTTP 500 error messages in `listing-system/workers/worker.js`. Added honeypot spam protection to `ContactForm.tsx`.
+  - Compliance: Removed unlicensed "realtor" keyword references from `layout.tsx`, `page.tsx`, and `about/page.tsx` in strict adherence with NAR trademark rules and `src/lib/compliance.ts`.
+  - SEO & Discoverability: Added native `src/app/robots.ts` and `src/app/sitemap.ts`. Added Schema.org `RealEstateAgent` JSON-LD structured data to homepage. Added `metadataBase` and Twitter card metadata to `layout.tsx`.
+  - UX & Accessibility: Added "Get Started" CTA button and accessibility attributes (`aria-expanded`, `aria-controls`) to mobile navigation in `src/components/nav.tsx`. Added `role="status"` and `role="alert"` live region announcements to `ContactForm.tsx`.
+  - Typography & Brand Design: Aligned `src/app/globals.css` with authoritative forest green & gold palette tokens and enabled `var(--font-sans)` font family on `body`.
+  - Operational Documentation: Reconciled `README.md`, `GO_LIVE_RUNBOOK.md`, `SECURITY.md`, and `LAUNCH_CHECKLIST.md` to document the active Resend transactional email architecture (`RESEND_API_KEY`) and Supabase backup, eliminating broken Gmail references. Fixed worker route collision risk in `wrangler.toml`.
 
 - Durable lead backup (2026-06-28): `/api/contact` persists every validated submission to Supabase
   `contact_leads` with delivery status when `LEAD_BACKUP_*` env vars are set (insert-only RLS,
@@ -11,7 +20,7 @@ Last updated: 2026-06-28
 
 - Public Next.js marketing website with homepage, listings, about, contact, shared navigation, and footer.
 - Contact form UI posts to `/api/contact`.
-- `/api/contact` rate-limits requests before parsing/sending mail, validates JSON payloads, trims and length-limits fields, validates email shape, preserves service-interest and timeline fields, checks Gmail env configuration, and sends email through Gmail via Nodemailer environment variables.
+- `/api/contact` rate-limits requests before parsing/sending mail, validates JSON payloads, trims and length-limits fields, validates email shape, preserves service-interest and timeline fields, and sends email via Resend API with durable Supabase backup.
 - Public service-offer pages exist at `/services`, `/services/deal-facilitation`, `/services/property-intelligence-report`, and `/services/seller-readiness-checkup`; offer CTAs route to `/contact?service=...` for service-tagged lead intake.
 - Vercel Analytics is installed globally through the App Router root layout.
 - Listings page is a launch-safe property-search request page; it does not fetch or render listing inventory until a production listings data source is verified.

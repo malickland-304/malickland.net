@@ -23,11 +23,12 @@ This platform serves as the central hub for:
 
 | Name | Hex |
 |------|-----|
-| Navy | `#1e3a5f` |
-| Dark Navy | `#152d4a` |
-| Darkest Navy | `#0f2137` |
-| Gold | `#c8961e` |
-| Light Gold | `#f0b429` |
+| Forest Green | `#1C3A1C` |
+| Forest Dark | `#142814` |
+| Forest Darkest | `#0F2A0F` |
+| Forest Border | `#254E25` |
+| Gold | `#C4A040` |
+| Light Gold | `#D4B050` |
 
 ## Pages
 
@@ -72,8 +73,13 @@ Copy `.env.example` to `.env.local` for local development and fill in only the v
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `GMAIL_USER` | Contact form | Gmail account used by `/api/contact` as the sender and recipient. |
-| `GMAIL_APP_PASSWORD` | Contact form | Gmail app password used by Nodemailer. Do not use or commit the normal account password. |
+| `RESEND_API_KEY` | Contact form | Resend API key used by `/api/contact` to send lead notification emails. |
+| `CONTACT_EMAIL_FROM` | Optional | Sender address on a Resend-verified domain (defaults to `MalickLand Contact Form <contact@malickland.net>`). |
+| `CONTACT_EMAIL_TO` | Optional | Recipient inbox for contact inquiries (defaults to `phil@malickland.net`). |
+| `CONTACT_EMAIL_TIMEOUT_MS` | Optional | Email send timeout in milliseconds (defaults to `5000`). |
+| `LEAD_BACKUP_SUPABASE_URL` | Optional | Supabase project URL for durable backup lead storage. |
+| `LEAD_BACKUP_SUPABASE_KEY` | Optional | Supabase publishable/anon key for insert-only backup storage under RLS. |
+| `LEAD_BACKUP_TIMEOUT_MS` | Optional | Lead backup insert timeout in milliseconds (defaults to `3000`). |
 | `CONTACT_RATE_LIMIT_MAX_REQUESTS` | Optional | Maximum `/api/contact` requests allowed per client window. Defaults to `5`. |
 | `CONTACT_RATE_LIMIT_WINDOW_SECONDS` | Optional | `/api/contact` rate-limit window in seconds. Defaults to `600`. |
 | `CONTACT_RATE_LIMIT_TRUST_PROXY_HEADERS` | Production contact form | Set to `true` only when the hosting/proxy layer strips or overwrites inbound IP headers. When unset, requests share an anonymous limiter key instead of trusting client-supplied headers. |

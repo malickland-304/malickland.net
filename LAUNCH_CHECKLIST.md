@@ -26,8 +26,8 @@ This is distinct from `QA_CHECKLIST.md` (per-task QA). This file is the **releas
 - [ ] Service-interest + timeline fields preserved end-to-end (already covered by `npm run test:contact`).
 - [ ] **Failure path verified:** with mail misconfigured/unreachable, the user sees an error and the
       form does **not** report false success. No lead silently drops.
-- [x] Required Gmail env vars (`GMAIL_USER`, `GMAIL_APP_PASSWORD`) present in the deploy environment
-      (names only — never commit secrets).
+- [ ] Required transactional email env var (`RESEND_API_KEY`) present in the deploy environment
+      (names only — never commit secrets). Optional: `CONTACT_EMAIL_FROM`, `CONTACT_EMAIL_TO`.
 - [ ] Consent line present on the form.
 - [ ] (Recommended) Durable lead backup active: `supabase/migrations/0001_contact_leads_backup.sql`
       applied and `LEAD_BACKUP_SUPABASE_URL`/`LEAD_BACKUP_SUPABASE_KEY` set in the deploy
@@ -87,12 +87,10 @@ Do not treat the site as launched until this gate passes.
       inventory and the Cloudflare Worker/listing subsystem are deferred until the data source,
       route ownership, and review process are verified.
 - [ ] Confirm Vercel production environment variables are present and correct:
-      `GMAIL_USER`, `GMAIL_APP_PASSWORD`, and, if durable rate limiting is required,
-      `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`. Rechecked
-      2026-06-28 with `vercel env ls production --scope malicklands-projects --cwd
-      /Users/yhyh7/malickland.net`: `GMAIL_USER` and `GMAIL_APP_PASSWORD` are present as encrypted
-      Production variables. Secret correctness is still unproven until the owner-approved real lead
-      test succeeds.
+      `RESEND_API_KEY`, and, if durable rate limiting is required,
+      `CONTACT_RATE_LIMIT_REDIS_REST_URL` + `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN`, and optional
+      `LEAD_BACKUP_SUPABASE_URL` + `LEAD_BACKUP_SUPABASE_KEY`. Secret correctness is proven
+      when the owner-approved real lead test succeeds.
 - [ ] Owner updates Cloudflare DNS deliberately: remove the old VPS pinning to `31.97.58.203`,
       point apex/`www` at the intended Vercel records, and choose proxied vs DNS-only plus SSL mode
       intentionally.

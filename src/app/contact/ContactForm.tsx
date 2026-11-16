@@ -72,6 +72,13 @@ export default function ContactForm({
     const form = e.currentTarget;
     const data = new FormData(form);
 
+    const honeypot = data.get("hp_email");
+    if (honeypot) {
+      setStatus("success");
+      form.reset();
+      return;
+    }
+
     const payload = {
       firstName: data.get("firstName"),
       lastName: data.get("lastName"),
@@ -117,7 +124,11 @@ export default function ContactForm({
 
   if (status === "success") {
     return (
-      <div className="bg-white rounded-2xl shadow-md p-10 text-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="bg-white rounded-2xl shadow-md p-10 text-center"
+      >
         <div className="w-16 h-16 bg-[#1C3A1C]/10 rounded-full flex items-center justify-center mx-auto mb-5">
           <svg className="w-8 h-8 text-[#1C3A1C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -153,12 +164,28 @@ export default function ContactForm({
       </p>
 
       {status === "error" && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700"
+        >
           {errorMsg}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Anti-spam honeypot (hidden from human users) */}
+        <div className="hidden" aria-hidden="true">
+          <label htmlFor="hp_email">Leave this field blank</label>
+          <input
+            type="text"
+            id="hp_email"
+            name="hp_email"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
+
         {/* Name row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>

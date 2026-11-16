@@ -15,10 +15,10 @@ Last updated: 2026-06-19
 
 - `.env`, `.env*.local`, `.vercel`, and `*.pem` are ignored.
 - Required runtime secrets/config currently identified:
-  - `GMAIL_USER`
-  - `GMAIL_APP_PASSWORD`
-  - `LISTINGS_API_URL` where deployed listings API differs from `https://malickland.net/api/listings`
-  - Cloudflare Worker secret `API_TOKEN`
+  - `RESEND_API_KEY` (production transactional email)
+  - `CONTACT_RATE_LIMIT_REDIS_REST_URL` and `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN` (production rate limiting)
+  - `LEAD_BACKUP_SUPABASE_URL` and `LEAD_BACKUP_SUPABASE_KEY` (durable lead backup)
+  - Cloudflare Worker secret `API_TOKEN` (future listing subsystem)
   - Optional Cloudflare Worker secret `LEADS_WEBHOOK`
   - Cloudflare account ID and KV namespace IDs in deployment config
   - Google Apps Script Sheet and Drive folder IDs
@@ -26,8 +26,11 @@ Last updated: 2026-06-19
 
 ## Current Immediate Risks
 
-- Production dependency advisories were found on 2026-05-27 in `next@16.1.6`, transitive `postcss`, and `nodemailer@8.0.3`; a new `nodemailer <=9.0.0` advisory was found on 2026-06-19. Manifests now target `next@^16.2.6`, `nodemailer@^9.0.1`, `@types/nodemailer@^8.0.1`, `eslint-config-next@^16.2.6`, plus a `postcss@^8.5.10` override, and both `npm audit --omit=dev --json` and full `npm audit --json` reported 0 vulnerabilities on 2026-06-19.
-- 2026-09-29 update: two critical `next` advisories (affected `>= 16.0.0, < 16.3.3`) were open against the deployed `next@16.2.6`. PR #27 moves the manifest to `next@^16.3.7` (lockfile `16.3.7`); on the PR branch `npm audit` and `npm audit --omit=dev` both report 0 vulnerabilities. Live status: unchanged until #27 is merged and the Vercel production deployment is verified. The May/June entries above are historical evidence.
+- Production and development dependency advisories: Manifests target `next@^16.4.6`, `eslint-config-next@^16.4.6`, and overrides for `postcss@^8.5.10`, `source-map-js@^1.2.2`, and `minimatch@^11.0.1`. Both `npm audit --omit=dev` and full `npm audit` report 0 vulnerabilities.
+- Next.js Image Optimization SSRF: Wildcard remotePattern (`hostname: "**"`) removed from `next.config.ts`. Only verified domains should ever be added.
+- HTTP Security Headers: Implemented in `next.config.ts` (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `HSTS`).
+- Worker Error Exposure: Sanitized HTTP 500 responses in `listing-system/workers/worker.js` to avoid leaking internal error strings or stack details.
+- Anti-Spam: Added hidden honeypot field in `ContactForm.tsx` to stop automated bots without user friction.
 - `/api/contact` now validates JSON shape, text types, required fields, field lengths, email shape, trims/sanitizes input, checks Gmail configuration before sending, avoids logging submitted form data, enforces request rate limits before mail send, and has repeatable validation plus route-level abuse tests.
 - `/api/contact` production abuse protection depends on `CONTACT_RATE_LIMIT_REDIS_REST_URL` and `CONTACT_RATE_LIMIT_REDIS_REST_TOKEN` for durable cross-instance limits. Without those values, the route falls back to an in-memory limiter that is suitable only for local development or a single long-running Node process. Partial Redis configuration and Redis timeouts fail closed. `CONTACT_RATE_LIMIT_TRUST_PROXY_HEADERS=true` should only be set when the hosting/proxy layer strips or overwrites inbound IP headers.
 - Cloudflare Worker CORS is currently `*`; this may be too permissive for write-adjacent APIs.

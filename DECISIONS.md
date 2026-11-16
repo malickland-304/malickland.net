@@ -1,5 +1,31 @@
 # Malickland 2.0 Decisions
 
+## 2026-11-16 - Comprehensive Security, Compliance, SEO, And Operational Hardening
+
+Problem: An end-to-end repository audit identified six distinct areas requiring remediation before production launch:
+1. Critical and high vulnerabilities existed in `next` (< 16.4.5), `source-map-js`, and `minimatch`.
+2. `next.config.ts` had a wildcard `hostname: "**"` in `remotePatterns`, exposing Next.js Image Optimization to SSRF and open proxy abuse, and lacked HTTP security headers.
+3. Unlicensed uses of the trademarked term "realtor" were found on the homepage, about page, and layout keywords, violating strict NAR trademark rules and the project's own compliance constraints (`src/lib/compliance.ts`).
+4. Operational runbook and setup documentation suffered from severe documentation drift: `README.md`, `GO_LIVE_RUNBOOK.md`, and `LAUNCH_CHECKLIST.md` directed operators to configure obsolete `GMAIL_USER` and `GMAIL_APP_PASSWORD` credentials after the handler had migrated to Resend (`RESEND_API_KEY`), which would cause live lead form submissions to fail with 503 errors.
+5. Search engines could not index or discover site structure due to missing `robots.txt`, `sitemap.xml`, and JSON-LD structured data.
+6. Mobile navigation omitted the primary "Get Started" conversion CTA and lacked accessibility attributes (`aria-expanded`).
+
+Decision:
+1. Bump `next` and `eslint-config-next` to `^16.4.6`, and add overrides for `source-map-js@^1.2.2` and `minimatch@^11.0.1`.
+2. Remove wildcard image patterns from `next.config.ts` and attach standard security headers (`X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, and `HSTS`).
+3. Replace all "realtor" references with "real estate agent".
+4. Reconcile all operational documentation with the active Resend (`RESEND_API_KEY`) and Supabase backup configuration. Correct `wrangler.toml` route patterns to prevent `/api/*` collision with Next.js API routes.
+5. Implement `src/app/robots.ts`, `src/app/sitemap.ts`, Schema.org `RealEstateAgent` JSON-LD, and `metadataBase`.
+6. Add the "Get Started" CTA, direct telephone link, and `aria-expanded` / `aria-controls` to the mobile navigation drawer. Add honeypot spam protection and live region attributes to `ContactForm.tsx`.
+
+Reasoning: These targeted improvements eliminate known security vulnerabilities, prevent operational go-live failures, satisfy West Virginia licensing compliance, and improve organic search and mobile conversion without changing the architectural topology.
+
+Alternatives considered: Ignoring documentation drift until after DNS cutover — rejected as dangerous to live business lead capture; using a third-party CAPTCHA service — rejected as intrusive to genuine client leads when honeypot and rate limiting suffice.
+
+Security/performance impact: Resolves all production and dev vulnerabilities (0 vulnerabilities reported by `npm audit`). Removes image optimization SSRF exposure. Restricts clickjacking and MIME sniffing. Reduces spam without blocking real inquiries.
+
+Files affected: `package.json`, `package-lock.json`, `next.config.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`, `src/app/about/page.tsx`, `src/app/robots.ts`, `src/app/sitemap.ts`, `src/components/nav.tsx`, `src/app/contact/ContactForm.tsx`, `listing-system/workers/worker.js`, `listing-system/workers/wrangler.toml`, `README.md`, `GO_LIVE_RUNBOOK.md`, `SECURITY.md`, `LAUNCH_CHECKLIST.md`, `PROJECT_STATE.md`, `TASKS.md`, `WORK_LOG.md`.
+
 ## 2026-06-28 - Persist Landing Attribution In Root Layout
 
 Problem: The merged contact form captured attribution on contact-form mount. That preserved source data for direct `/contact` visits, but a visitor landing on another page with UTMs and then navigating internally to `/contact` could lose the original landing path and campaign context.

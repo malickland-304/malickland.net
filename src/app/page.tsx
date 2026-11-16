@@ -89,9 +89,46 @@ const testimonials = [
   },
 ];
 
+// ─── JSON-LD Schema ───────────────────────────────────────────────────────
+const realEstateAgentJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  name: "MalickLand — WV Real Estate Agency",
+  image: "https://malickland.net/phil-headshot.jpg",
+  url: "https://malickland.net",
+  telephone: "+1-540-246-1421",
+  email: "phil@malickland.net",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "501 East Main Street",
+    addressLocality: "Romney",
+    addressRegion: "WV",
+    postalCode: "26757",
+    addressCountry: "US",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 39.3426,
+    longitude: -78.7567,
+  },
+  areaServed: [
+    "Hampshire County, WV",
+    "Hardy County, WV",
+    "Morgan County, WV",
+    "Berkeley County, WV",
+    "Jefferson County, WV",
+    "Mineral County, WV",
+  ],
+  priceRange: "$$",
+};
+
 export default function HomePage() {
   return (
     <div className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(realEstateAgentJsonLd) }}
+      />
       {/* ── HERO ──────────────────────────────────────────────────────── */}
       <section
         className="relative min-h-[85vh] flex items-center overflow-hidden"
@@ -188,7 +225,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-white text-sm font-medium">
-                  &quot;Phil is the best realtor in Hampshire County.&quot;
+                  &quot;Phil is the best real estate agent in Hampshire County.&quot;
                 </p>
                 <p className="text-slate-400 text-xs mt-1">— Verified Client</p>
               </div>

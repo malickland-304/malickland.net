@@ -35,9 +35,9 @@ DNS:
 
 1. In Vercel → Project → Settings → Environment Variables (Production),
    confirm:
-   - `GMAIL_USER` = the inbox that should receive leads
-   - `GMAIL_APP_PASSWORD` = a valid Gmail **app password** for that account
-     (16 chars; whitespace is stripped by the app, but paste it clean)
+   - `RESEND_API_KEY` = your valid Resend API key (`re_...` from https://resend.com/api-keys)
+   - (Optional) `CONTACT_EMAIL_FROM` = sender address on your Resend-verified domain (defaults to `MalickLand Contact Form <contact@malickland.net>`)
+   - (Optional) `CONTACT_EMAIL_TO` = recipient inbox for leads (defaults to `phil@malickland.net`)
 2. Redeploy production after any env change (env vars are baked at deploy).
 3. Submit a real test lead through `/contact` **on the Vercel URL** and confirm
    it arrives in the inbox with the attribution block populated (source path,
@@ -48,7 +48,7 @@ DNS:
 
 ## Step 3 — Activate the lead backup store (10 min, once)
 
-Insurance so a Gmail outage can never lose a lead. Optional but strongly
+Insurance so an email outage can never lose a lead. Optional but strongly
 recommended **before** cutover.
 
 1. Apply `supabase/migrations/0001_contact_leads_backup.sql` in the Supabase
@@ -64,7 +64,7 @@ recommended **before** cutover.
    Supabase → Table Editor → `contact_leads` with `email_delivered = true`.
 
 After this, every lead is written to the table with its delivery status —
-including leads whose email send fails. If Gmail ever breaks, recover leads
+including leads whose email send fails. If email delivery ever breaks, recover leads
 from this table (`email_delivered = false`).
 
 ## Step 4 — Cut the domain over (15 min + DNS propagation)
@@ -95,7 +95,7 @@ from this table (`email_delivered = false`).
 
 - Glance at Supabase `contact_leads` for rows with `email_delivered = false` —
   each one is a lead that would have been lost pre-backup. If any appear,
-  fix Gmail creds and contact those leads.
+  verify Resend API key/domain configuration and contact those leads.
 - Free-tier Supabase pauses after ~1 week without traffic; form submissions
   count as activity, but if traffic is very low, un-pause it during the weekly
   glance.

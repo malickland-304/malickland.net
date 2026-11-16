@@ -24,6 +24,9 @@ id = "YOUR_KV_NAMESPACE_ID"
 # LEADS_WEBHOOK = your Google Apps Script URL for lead forwarding (optional)
 
 # ── Routes ───────────────────────────────────────────────────────────────────
+# WARNING: Do NOT use a broad "malickland.net/api/*" pattern here, as it would
+# intercept Next.js API routes (such as /api/contact) and return 404.
+# Only route listing-specific API endpoints to this Worker.
 # Option A: Deploy as a standalone worker on a custom domain
 [[routes]]
 pattern = "malickland.net/listing/*"
@@ -34,7 +37,15 @@ pattern = "malickland.net/listings"
 zone_name = "malickland.net"
 
 [[routes]]
-pattern = "malickland.net/api/*"
+pattern = "malickland.net/api/listing*"
+zone_name = "malickland.net"
+
+[[routes]]
+pattern = "malickland.net/api/save"
+zone_name = "malickland.net"
+
+[[routes]]
+pattern = "malickland.net/api/lead"
 zone_name = "malickland.net"
 
 # Option B: If using workers.dev subdomain (simpler, no custom domain needed)
