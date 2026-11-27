@@ -32,9 +32,9 @@ id = "YOUR_KV_NAMESPACE_ID"
 pattern = "malickland.net/listing/*"
 zone_name = "malickland.net"
 
-[[routes]]
-pattern = "malickland.net/listings"
-zone_name = "malickland.net"
+# NOTE: do NOT route "malickland.net/listings" here. The Worker answers
+# GET /listings with a 301 to https://malickland.net/listings (the Next.js
+# page), so routing that path to the Worker creates an infinite redirect loop.
 
 [[routes]]
 pattern = "malickland.net/api/listing*"
@@ -46,6 +46,10 @@ zone_name = "malickland.net"
 
 [[routes]]
 pattern = "malickland.net/api/lead"
+zone_name = "malickland.net"
+
+[[routes]]
+pattern = "malickland.net/api/health"
 zone_name = "malickland.net"
 
 # Option B: If using workers.dev subdomain (simpler, no custom domain needed)
