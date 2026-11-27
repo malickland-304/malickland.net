@@ -78,11 +78,17 @@ npx wrangler deploy
 1. Go to Cloudflare Dashboard → Workers & Pages → malickland-listings
 2. Under Settings → Triggers → Routes, verify these routes are active:
    - `malickland.net/listing/*`
-   - `malickland.net/listings`
-   - `malickland.net/api/*`
+   - `malickland.net/api/listing*`
+   - `malickland.net/api/save`
+   - `malickland.net/api/lead`
+   - `malickland.net/api/health`
+
+   Do **not** add `malickland.net/api/*` (it would intercept the Next.js
+   `/api/contact` route) or `malickland.net/listings` (the Worker 301-redirects
+   `/listings` to the Next.js page, so routing it to the Worker loops forever).
 
 **Test it:**
-- Visit `https://malickland.net/listings` → Should show a listings index page
+- Visit `https://malickland.net/api/listings` → Should return the listings JSON
 - Visit `https://malickland.net/api/health` → Should return `{"ok":true}`
 
 ---

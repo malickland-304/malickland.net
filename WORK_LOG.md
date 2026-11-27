@@ -1,5 +1,29 @@
 # Malickland 2.0 Work Log
 
+## 2026-11-27 - Post-push review of 80d9a41 / 7a85bfb (Claude)
+
+### Objective
+
+Review the two commits pushed straight to `main` on 2026-11-16 without a PR, re-run the project checks, and make the smallest fixes for confirmed defects.
+
+### Changes Made
+
+- Scoped the `minimatch` override to `@typescript-eslint/typescript-estree`. The blanket `minimatch@^11.0.1` override broke ESLint rules in `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react` (`_minimatch.default is not a function`); the advisory (GHSA-g3hv-75wg-m249) only covers minimatch 7.0.0-11.0.0.
+- Removed the `malickland.net/listings` Worker route (the Worker 301s `/listings` to itself, which would loop) and re-added `malickland.net/api/health`; corrected the route list in `listing-system/README.md`.
+- Corrected `og:image` width/height to the real 1024x1156 headshot size.
+- Updated the stale Gmail/Nodemailer line in `ARCHITECTURE.md` to the Resend pipeline.
+- Removed the unreferenced duplicate `public/phils headshot/phils headshot.jpeg`.
+
+### Verification
+
+- `npm ci`, `npm run lint`, `npx tsc --noEmit`, `npm run build`, `npm run test:contact` (26/26), `npm run test:worker` (7/7), `npm run test:public-pages`, `npm audit` and `npm audit --omit=dev` (0 vulnerabilities) all passed after the changes.
+- ESLint probe with `jsx-a11y/label-has-associated-control` and `import/order` enabled crashed before the override fix and runs cleanly after it.
+
+### Remaining Risks
+
+- Honeypot in `ContactForm.tsx` is client-side only and reports success without sending; the server never sees or checks it. Owner decision on the approach.
+- Without `CONTACT_RATE_LIMIT_TRUST_PROXY_HEADERS=true` every visitor shares one rate-limit bucket (5 per 10 minutes); with it, `cf-connecting-ip` is trusted first, which is client-spoofable unless traffic really passes through Cloudflare's proxy.
+
 ## 2026-11-16 - Comprehensive Security, Compliance, SEO, and Operational Hardening
 
 ### Objective
