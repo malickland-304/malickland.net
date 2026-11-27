@@ -18,7 +18,7 @@ Malickland 2.0 is currently a public real-estate marketing website plus a tracke
   - `/listings`: launch-safe property-search request page. It does not fetch or render listing inventory until a production listings data source is verified.
   - `/about`: public bio and service-area page.
   - `/contact`: client contact form.
-  - `/api/contact`: Next.js route handler that sends contact inquiries through Gmail via Nodemailer.
+  - `/api/contact`: Next.js route handler that validates and rate-limits contact inquiries, sends them through the Resend HTTP API (`RESEND_API_KEY`), and writes a backup row to Supabase `contact_leads` when `LEAD_BACKUP_SUPABASE_*` is set.
 - Hosting: README says Squarespace DNS to Cloudflare to Vercel or custom host. Current production topology must be verified before deployment changes.
 - Package manager: npm with `package-lock.json` as the lockfile of record.
 
