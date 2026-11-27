@@ -50,8 +50,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/phil-headshot.jpg",
-        width: 1200,
-        height: 1200,
+        width: 1024,
+        height: 1156,
         alt: "Phil Malick — WV Licensed Real Estate Agent",
       },
     ],
